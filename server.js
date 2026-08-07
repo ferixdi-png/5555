@@ -5,13 +5,20 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-final-audited';
+const APP_VERSION = '20260807-ferixdi-final';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
   '.json':'application/json; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg',
   '.webp':'image/webp', '.ico':'image/x-icon', '.mp4':'video/mp4', '.webm':'video/webm', '.mp3':'audio/mpeg', '.wav':'audio/wav'
 };
+
+const ROOT_AUTHOR = new Map([
+  ['/author/ferixdi-01.png', 'ChatGPT Image 7 авг. 2026 г., 11_42_48 (1).png'],
+  ['/author/ferixdi-02.png', 'ChatGPT Image 7 авг. 2026 г., 11_42_48 (2).png'],
+  ['/author/ferixdi-03.png', 'ChatGPT Image 7 авг. 2026 г., 11_42_49 (3).png'],
+  ['/author/ferixdi-04.png', 'ChatGPT Image 7 авг. 2026 г., 11_42_49 (4).png']
+]);
 
 const recent = new Map();
 const BASE_HEADERS = {
@@ -86,6 +93,13 @@ function availableVideos() {
 function safeFile(urlPath) {
   let decoded;
   try { decoded=decodeURIComponent(urlPath); } catch { return null; }
+  const normalized='/' + decoded.replace(/^[/\\]+/,'').replace(/\\/g,'/');
+  const rootAsset=ROOT_AUTHOR.get(normalized);
+  if (rootAsset) {
+    const authorFile=path.resolve(__dirname,rootAsset);
+    if (fs.existsSync(authorFile)) return authorFile;
+  }
+
   const stripped=decoded.replace(/^[/\\]+/,'');
   const file=path.resolve(PUBLIC,stripped);
   if (file !== PUBLIC && !file.startsWith(PUBLIC + path.sep)) return null;
@@ -111,10 +125,8 @@ function versionHtml(html) {
   if (!out.includes('/journey.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/journey.css?v=${APP_VERSION}">\n</head>`);
   if (!out.includes('/final-polish.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/final-polish.css?v=${APP_VERSION}">\n</head>`);
   if (!out.includes('/audit-fixes.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/audit-fixes.css?v=${APP_VERSION}">\n</head>`);
+  if (!out.includes('/ferixdi.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/ferixdi.css?v=${APP_VERSION}">\n</head>`);
   if (!out.includes('/journey.js')) out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
-
-  out = out.replace('>Получить доступ</a>', '>Напиши мне — дам гайд</a>')
-           .replace('>Забрать реквизиты / задать вопрос<', '>Напиши мне — дам гайд<');
   return out;
 }
 
