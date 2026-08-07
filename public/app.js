@@ -62,6 +62,19 @@
   const playerDirect=$('.safe-player-direct',player);
   let currentSrc='';
   let historyArmed=false;
+  let lastPlayerTrigger=null;
+  let playerTimer=0;
+
+  const clearPlayerTimer=()=>{ if(playerTimer){ clearTimeout(playerTimer); playerTimer=0; } };
+  const armPlayerTimeout=(ms=15000)=>{
+    clearPlayerTimer();
+    playerTimer=setTimeout(()=>{
+      if(player.classList.contains('is-open') && !player.classList.contains('is-playing')){
+        player.classList.remove('is-loading');
+        player.classList.add('is-error');
+      }
+    },ms);
+  };
 
   function stopBgAudio(){
     if(bgAudio && !bgAudio.paused){ bgAudio.dataset.resumeAfterVideo='1'; bgAudio.pause(); }
@@ -73,6 +86,7 @@
     }
   }
   function resetPlayerMedia(){
+    clearPlayerTimer();
     playerVideo.pause();
     playerVideo.removeAttribute('src');
     playerVideo.load();
@@ -81,6 +95,8 @@
   }
   function closePlayer(fromPopState=false){
     if(!player.classList.contains('is-open')) return;
+    const focusTarget=lastPlayerTrigger;
+    lastPlayerTrigger=null;
     player.classList.remove('is-open');
     player.setAttribute('aria-hidden','true');
     document.documentElement.classList.remove('video-player-open');
@@ -90,11 +106,13 @@
       historyArmed=false;
       if(history.state?.videoPlayer) history.back();
     } else historyArmed=false;
+    setTimeout(()=>focusTarget?.focus?.({preventScroll:true}),0);
   }
-  function openPlayer(src,caption){
+  function openPlayer(src,caption,trigger=null){
     if(!src) return;
     stopBgAudio();
     currentSrc=src;
+    lastPlayerTrigger=trigger;
     playerCaption.textContent=caption;
     playerDirect.href=src;
     player.classList.add('is-open','is-loading');
@@ -104,6 +122,7 @@
     playerVideo.src=src;
     playerVideo.preload='metadata';
     playerVideo.load();
+    armPlayerTimeout(15000);
     if(!historyArmed){
       try{ history.pushState({videoPlayer:true},''); historyArmed=true; }catch{}
     }
@@ -113,20 +132,26 @@
   $$('[data-close-player]',player).forEach(el=>el.addEventListener('click',()=>closePlayer()));
   addEventListener('keydown',e=>{if(e.key==='Escape'&&player.classList.contains('is-open')) closePlayer();});
   addEventListener('popstate',()=>{if(player.classList.contains('is-open')) closePlayer(true);});
+  addEventListener('pagehide',()=>{ if(player.classList.contains('is-open')) resetPlayerMedia(); });
 
   playerPlay.addEventListener('click',()=>{
     if(!currentSrc) return;
     stopBgAudio();
+    player.classList.add('is-loading');
+    player.classList.remove('is-error');
+    armPlayerTimeout(15000);
     const p=playerVideo.play();
-    if(p?.catch) p.catch(()=>{ player.classList.add('is-error'); });
+    if(p?.catch) p.catch(()=>{ clearPlayerTimer(); player.classList.remove('is-loading'); player.classList.add('is-error'); });
   });
   playerVideo.addEventListener('loadstart',()=>player.classList.add('is-loading'));
-  playerVideo.addEventListener('loadedmetadata',()=>player.classList.add('is-ready'));
+  playerVideo.addEventListener('loadedmetadata',()=>{ clearPlayerTimer(); player.classList.add('is-ready'); });
   playerVideo.addEventListener('canplay',()=>player.classList.remove('is-loading','is-error'));
-  playerVideo.addEventListener('playing',()=>player.classList.add('is-playing'));
-  playerVideo.addEventListener('pause',()=>player.classList.remove('is-playing'));
-  playerVideo.addEventListener('ended',()=>player.classList.remove('is-playing'));
-  playerVideo.addEventListener('error',()=>{player.classList.remove('is-loading');player.classList.add('is-error');});
+  playerVideo.addEventListener('playing',()=>{ clearPlayerTimer(); player.classList.remove('is-loading','is-error'); player.classList.add('is-playing'); });
+  playerVideo.addEventListener('waiting',()=>{ if(!playerVideo.paused) player.classList.add('is-loading'); });
+  playerVideo.addEventListener('stalled',()=>{ if(!playerVideo.paused) player.classList.add('is-loading'); });
+  playerVideo.addEventListener('pause',()=>player.classList.remove('is-playing','is-loading'));
+  playerVideo.addEventListener('ended',()=>player.classList.remove('is-playing','is-loading'));
+  playerVideo.addEventListener('error',()=>{ clearPlayerTimer(); player.classList.remove('is-loading'); player.classList.add('is-error'); });
 
   function updateVideoState(){
     if(countEl) countEl.textContent=expected;
@@ -209,7 +234,7 @@
         card.addEventListener('focusin',()=>previewPlay(card,v));
         card.addEventListener('focusout',()=>previewPause(v));
       }
-      const open=()=>{ v.pause(); openPlayer(src,`${num} / ${title} · 1080P · 8 SEC`); };
+      const open=()=>{ v.pause(); openPlayer(src,`${num} / ${title} · 1080P · 8 SEC`,card); };
       card.addEventListener('click',open);
       card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
       wall.appendChild(card);
