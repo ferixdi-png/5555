@@ -5,6 +5,8 @@
   document.head.appendChild(whyCss);
 
   const $ = (s, r=document) => r.querySelector(s);
+  const navLinks = $('.nav-links');
+  if (navLinks && !navLinks.querySelector('a[href="#why"]')) navLinks.insertAdjacentHTML('beforeend','<a href="#why">Зачем</a>');
 
   const discovery = $('.discovery-badge');
   if (discovery) discovery.textContent = 'НАШЁЛ ВАРИАНТ, КОТОРЫМ САМ ПОЛЬЗУЮСЬ ↓';
