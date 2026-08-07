@@ -35,7 +35,7 @@
   if(!$('.telegram-float')){
     const a=document.createElement('a');
     a.className='telegram-float';a.href=tg;a.target='_blank';a.rel='noopener';
-    a.innerHTML='<span>Хочу безлимит <small>написать Ferixdi в Telegram</small></span>';
+    a.innerHTML='<span>Хочу безлимит <small>написать @religantno в Telegram</small></span>';
     document.body.appendChild(a);
   }
 
