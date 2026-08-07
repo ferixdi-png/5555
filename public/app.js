@@ -31,17 +31,33 @@
   const modal=$('#videoModal'), modalVideo=$('#modalVideo'), modalCaption=$('#modalCaption'), modalClose=$('#modalClose');
   let loaded=0, checked=0, expected=0;
 
+  const primeIO = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      const v=e.target;
+      if(v.dataset.primed) return primeIO.unobserve(v);
+      v.dataset.primed='1';
+      v.preload='auto';
+      try{ if(v.duration>.05) v.currentTime=Math.min(1.15,v.duration*.16); }catch{}
+      primeIO.unobserve(v);
+    });
+  },{rootMargin:'420px 0px',threshold:.01}) : null;
+
   function updateVideoState(){
-    if(countEl) countEl.textContent=loaded;
+    if(countEl) countEl.textContent=expected||loaded;
     if(empty) empty.style.display = expected===0 || (checked>=expected&&loaded===0) ? 'block' : 'none';
     const worksP=$('#works .section-head.split>p');
-    if(worksP && loaded>0 && checked>=expected) worksP.textContent=`Здесь ${loaded} моих реальных генераций из этого доступа. Все ролики — 1080p по 8 секунд. На компьютере наведи на карточку для превью, на телефоне просто открой её крупно.`;
+    if(worksP && expected>0) worksP.textContent=`Здесь ${expected} моих реальных генераций из этого доступа. Все ролики — 1080p по 8 секунд. На компьютере наведи на карточку для превью, на телефоне просто открой её крупно.`;
   }
 
+  function prime(v){
+    if(v.dataset.primed) return;
+    v.dataset.primed='1'; v.preload='auto';
+    try{ if(v.duration>.05) v.currentTime=Math.min(1.15,v.duration*.16); }catch{}
+  }
   function previewPlay(card,v){
     if(!fine||!card.dataset.ready) return;
-    $$('.video-card video').forEach(other=>{if(other!==v) other.pause();});
-    v.play().catch(()=>{});
+    prime(v); $$('.video-card video').forEach(other=>{if(other!==v) other.pause();}); v.play().catch(()=>{});
   }
   function previewPause(v){ if(fine) v.pause(); }
 
@@ -82,9 +98,8 @@
         <div class="video-label"><b>${title}</b><span>${tag} · 1080P · 8 SEC</span></div>`;
       const v=$('video',card);
       v.addEventListener('loadedmetadata',()=>{
-        loaded++;checked++;card.dataset.ready='1';
-        try { if(v.duration>.05) v.currentTime=Math.min(1.15,v.duration*.16); } catch {}
-        updateVideoState();
+        loaded++;checked++;card.dataset.ready='1';updateVideoState();
+        if(primeIO) primeIO.observe(v); else prime(v);
       },{once:true});
       v.addEventListener('error',()=>{checked++;card.remove();updateVideoState();},{once:true});
       if(fine){
