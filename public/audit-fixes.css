@@ -60,6 +60,8 @@ a,button,.video-card{touch-action:manipulation}
   .video-play i{width:46px!important;height:46px!important}
   .video-play i:after{border-width:6px 0 6px 9px!important}
   .telegram-float{max-width:none!important}
+  .nav-cta{min-height:40px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+  .logo{min-height:40px!important}
 }
 
 @media(max-width:390px){
