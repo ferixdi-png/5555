@@ -34,14 +34,23 @@
     });
   }
 
+  // Real labels based on the actual uploaded clips.
   const labels = [
-    ['CINEMATIC','Киношная сцена'],['UGC','Живой персонаж'],['PRODUCT','Реклама продукта'],
-    ['VIRAL','Вирусная идея'],['RU VOICE','Русская речь'],['POV','POV / смартфон'],
-    ['STORY','Сторителлинг'],['FOOD','Предметная сцена'],['ANIMAL','Животные'],
-    ['CITY','Город / атмосфера'],['MEME','Абсурд'],['ADS','Рекламный креатив'],
-    ['REALISM','Фотореализм'],['CAMERA','Движение камеры'],['DIALOGUE','Диалог'],
-    ['NATURE','Природа'],['FASHION','Fashion'],['MACRO','Macro'],
-    ['EXPERIMENT','Эксперимент'],['FAVORITE','Ещё один результат']
+    ['REALISM','Космонавт на рынке'],
+    ['CHARACTER','Героиня в автобусе'],
+    ['COMEDY','Клоун во дворе'],
+    ['UGC','Бабушка снимает UGC'],
+    ['STREET','Мужчина и голуби'],
+    ['CHARACTER','Персонаж у киоска'],
+    ['DIALOGUE','Диалог в офисе'],
+    ['COMEDY','Ковбой в прачечной'],
+    ['ABSURD','Невеста на заправке'],
+    ['CHARACTER','Рыцарь у цветочного'],
+    ['REALISM','Бытовая сцена во дворе'],
+    ['LIP-SYNC','Мим выбирает щётку'],
+    ['EXAMPLE','Ещё один тест'],['EXAMPLE','Ещё один тест'],['EXAMPLE','Ещё один тест'],
+    ['EXAMPLE','Ещё один тест'],['EXAMPLE','Ещё один тест'],['EXAMPLE','Ещё один тест'],
+    ['EXAMPLE','Ещё один тест'],['EXAMPLE','Ещё один тест']
   ];
 
   const wall=$('#videoWall'), countEl=$('#videoCount'), empty=$('#emptyState');
@@ -65,6 +74,7 @@
   function previewPause(v){v.pause();}
 
   if (wall) {
+    wall.innerHTML='';
     for(let i=1;i<=20;i++){
       const num=String(i).padStart(2,'0');
       const [tag,title]=labels[i-1];
@@ -73,11 +83,11 @@
       card.innerHTML=`
         <video src="/videos/video-${num}.mp4" muted loop playsinline preload="metadata"></video>
         <div class="video-play"><i></i></div>
-        <div class="video-label"><b>${title}</b><span>${tag}</span></div>`;
+        <div class="video-label"><b>${title}</b><span>${tag} · 1080P · 8 SEC</span></div>`;
       const v=$('video',card);
       v.addEventListener('loadedmetadata',()=>{
         loaded++;checked++;card.dataset.ready='1';
-        try { if (v.duration > .05) v.currentTime=.04; } catch {}
+        try { if (v.duration > .05) v.currentTime=Math.min(1.2,v.duration*.16); } catch {}
         updateVideoState();
       },{once:true});
       v.addEventListener('error',()=>{checked++;card.remove();updateVideoState();},{once:true});
@@ -89,8 +99,9 @@
         if(!card.dataset.ready || !modal?.showModal) return;
         v.pause();
         modalVideo.src=v.currentSrc || v.src;
-        modalCaption.textContent=`Пример ${num} / ${title}`;
+        modalCaption.textContent=`${num} / ${title} · 1080P · 8 SEC`;
         modal.showModal();
+        modalVideo.currentTime=0;
         modalVideo.play().catch(()=>{});
       });
       wall.appendChild(card);
