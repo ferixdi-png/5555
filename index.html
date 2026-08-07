@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#05070a" />
+<meta name="description" content="Результаты теста безлимитной генерации AI-видео: короткие промпты, русский lip-sync и длинные ролики из нескольких сцен." />
+<title>AI Video Lab — безлимитная генерация видео</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas><div class="bg-vignette"></div><div class="bg-grid"></div><div class="noise"></div>
+
+<nav class="nav" id="nav"><div class="wrap navin">
+  <a class="brand" href="#top"><span class="brand-mark"></span>AI VIDEO <span>LAB</span></a>
+  <div class="navlinks"><a href="#results">Результаты</a><a href="#lipsync">RU lip-sync</a><a href="#long">Длинные ролики</a></div>
+  <a class="navcta" href="#access"><i></i> Получить доступ</a>
+</div></nav>
+
+<main id="top">
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy reveal">
+      <div class="eyebrow"><span class="pulse"></span> Личный тест безлимитной AI-видеогенерации</div>
+      <h1><span class="hero-grad">Видео без счётчика.</span><br>Результат — здесь.</h1>
+      <p class="lead">Подключил безлимит примерно за <strong>1 000 ₽ на месяц</strong> и проверяю, что реально можно получать: короткие промпты, кинематографичная картинка, <strong>русская речь</strong> и длинные ролики из нескольких сцен.</p>
+      <div class="actions"><a class="btn primary" href="#results">Смотреть результаты ↘</a><a class="btn" href="#long">Как собрать длинный ролик</a></div>
+      <div class="hero-meta"><span><b></b> название платформы не раскрываю</span><span><b></b> реальные генерации</span><span><b></b> простые промпты</span></div>
+    </div>
+    <div class="hero-visual reveal" id="heroVisual">
+      <div class="phone" data-tilt="10"><div class="phone-screen"><div class="phone-orb"></div></div></div>
+      <div class="chip c1"><strong>RU lip-sync <em>✓</em></strong>Нормальная русская речь</div>
+      <div class="chip c2"><strong>Long-form →</strong>Сцены складываются в один ролик</div>
+      <div class="chip c3"><strong>Unlimited mode</strong>Тестирую без экономии на попытках</div>
+    </div>
+  </div>
+  <div class="scroll-note"><span class="mouse"></span> прокрути вниз</div>
+</header>
+
+<div class="stats-wrap"><div class="wrap stats reveal">
+  <div class="stat"><strong>~1 000 ₽</strong><span>ориентир стоимости доступа на месяц</span></div>
+  <div class="stat"><strong>RU ✓</strong><span>русский lip-sync и озвучка</span></div>
+  <div class="stat"><strong>1 prompt</strong><span>короткие запросы без полотен текста</span></div>
+  <div class="stat"><strong>∞ scenes</strong><span>длинный ролик через последовательные сцены</span></div>
+</div></div>
+
+<section id="results"><div class="wrap">
+  <div class="section-kicker reveal">01 / Результаты</div>
+  <h2 class="section-title reveal">Пишу коротко. Смотрю, насколько далеко модель дотянет сама.</h2>
+  <p class="section-copy reveal">Здесь будут реальные ролики из теста. Смысл специально не в сложных инженерных промптах — хочется показать, что можно получить буквально из одной понятной фразы.</p>
+
+  <div class="showcase">
+    <article class="demo big glass reveal" data-tilt="5">
+      <div class="media"><video src="videos/cinematic.mp4" playsinline muted loop preload="metadata"></video><div class="media-placeholder"><div class="play"></div></div><div class="media-tag">CINEMATIC / 16:9</div></div>
+      <div class="demo-body"><div class="demo-top"><div><h3>Киношная сцена</h3><p>Свет, камера и атмосфера без перегруженного описания.</p></div><span class="score">WOW</span></div><div class="prompt">A black sports car driving through a rainy neon city at night, cinematic, ultra realistic.</div></div>
+    </article>
+
+    <article class="demo side glass reveal" data-tilt="5">
+      <div class="media"><video src="videos/ugc.mp4" playsinline muted loop preload="metadata"></video><div class="media-placeholder"><div class="play"></div></div><div class="media-tag">UGC / 9:16</div></div>
+      <div class="demo-body"><div class="demo-top"><div><h3>Живой человек</h3><p>Натуральная кожа, мимика и смартфонная подача.</p></div><span class="score">REAL</span></div><div class="prompt">Young woman talking to a phone camera in a cozy apartment, natural UGC video, realistic.</div></div>
+    </article>
+
+    <article class="demo half glass reveal" data-tilt="5">
+      <div class="media"><video src="videos/product.mp4" playsinline muted loop preload="metadata"></video><div class="media-placeholder"><div class="play"></div></div><div class="media-tag">PRODUCT</div></div>
+      <div class="demo-body"><div class="demo-top"><div><h3>Реклама продукта</h3><p>Уже похоже на материал, который можно отдавать клиенту.</p></div><span class="score">ADS</span></div><div class="prompt">Luxury perfume bottle on black stone, premium studio commercial, slow camera movement.</div></div>
+    </article>
+
+    <article class="demo half glass reveal" data-tilt="5">
+      <div class="media"><video src="videos/viral.mp4" playsinline muted loop preload="metadata"></video><div class="media-placeholder"><div class="play"></div></div><div class="media-tag">VIRAL</div></div>
+      <div class="demo-body"><div class="demo-top"><div><h3>Абсурдная сцена</h3><p>То, ради чего хочется нажимать «генерировать» ещё раз.</p></div><span class="score">FUN</span></div><div class="prompt">CCTV footage in a supermarket, a dinosaur calmly walks through the aisle, realistic.</div></div>
+    </article>
+  </div>
+</div></section>
+
+<section id="lipsync"><div class="wrap sticky-scene">
+  <div class="sticky-copy">
+    <div class="section-kicker reveal">02 / Русская речь</div>
+    <h2 class="section-title reveal">Русский lip-sync — не декоративная галочка.</h2>
+    <p class="section-copy reveal">Я отдельно проверяю речь, потому что красивый кадр без нормальной русской озвучки для многих задач бесполезен. Здесь нужен результат, который можно сразу показывать в контенте.</p>
+    <div class="quote reveal"><strong>«Смысл в том, что персонаж говорит по-русски —</strong> <span>и это выглядит естественно».</span></div>
+  </div>
+  <article class="lip-card glass reveal" data-tilt="4">
+    <div class="lip-video"><video src="videos/lipsync.mp4" playsinline controls preload="metadata" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;background:transparent"></video><div class="face"><div class="mouth"></div></div><div class="wave">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div></div>
+    <div class="lip-body"><h3 style="font-size:30px;letter-spacing:-.045em;margin:0">Тест: короткая русская фраза</h3><div class="prompt">A young man looks at the camera and says naturally in Russian: «Проверяю, насколько хорошо генератор говорит по-русски».</div><div class="checklist"><div class="check"><b>✓</b><span>Речь звучит как часть самой сцены, а не отдельная озвучка поверх.</span></div><div class="check"><b>✓</b><span>Можно использовать в UGC, диалогах, коротких сценках и объясняющих роликах.</span></div><div class="check"><b>✓</b><span>Короткая реплика = меньше риска и проще получить чистый дубль.</span></div></div></div>
+  </article>
+</div></section>
+
+<section id="long"><div class="wrap">
+  <div class="section-kicker reveal">03 / Длинные ролики</div>
+  <h2 class="section-title reveal">Длина ограничена одной генерацией. Но не твоим роликом.</h2>
+  <p class="section-copy reveal">Если нужен ролик на 30, 60 секунд и больше — разбиваю идею на последовательные сцены, генерирую каждую отдельно и склеиваю. Это особенно удобно для рекламы, историй и мини-фильмов.</p>
+  <div class="long-wrap glass reveal">
+    <div class="timeline">
+      <div class="clip"><div class="clip-visual"></div><b>Сцена 01</b><span>Задаём героя, локацию и начало истории.</span></div>
+      <div class="clip"><div class="clip-visual"></div><b>Сцена 02</b><span>Продолжаем действие с тем же визуальным направлением.</span></div>
+      <div class="clip"><div class="clip-visual"></div><b>Сцена 03</b><span>Добавляем поворот, диалог или новый ракурс.</span></div>
+      <div class="clip"><div class="clip-visual"></div><b>Сцена 04</b><span>Финал и переход к монтажу.</span></div>
+    </div>
+    <div class="long-bottom"><div><strong>4 сцены → один цельный ролик</strong><p>Повторяем нужное количество раз. Безлимит особенно полезен именно здесь: не приходится экономить каждую попытку.</p></div><span class="badge-long">30s • 60s • 90s+</span></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="section-kicker reveal">04 / Зачем мне это</div>
+  <h2 class="section-title reveal">Не «нейросеть ради нейросети». А рабочий генератор контента.</h2>
+  <div class="feature-grid">
+    <article class="feature glass reveal"><span class="n">01</span><h3>Больше попыток</h3><p>Можно спокойно перегенерировать сцену, искать лучший дубль и не считать каждую попытку.</p><span class="feature-orb"></span></article>
+    <article class="feature glass reveal"><span class="n">02</span><h3>Короткие промпты</h3><p>Для большинства демонстраций я специально использую простые запросы, которые легко повторить.</p><span class="feature-orb"></span></article>
+    <article class="feature glass reveal"><span class="n">03</span><h3>Контент под задачи</h3><p>UGC, реклама, мемы, сторителлинг, русская речь и последовательные сцены в одном пайплайне.</p><span class="feature-orb"></span></article>
+  </div>
+</div></section>
+
+<section id="access"><div class="wrap">
+  <div class="cta reveal">
+    <div class="section-kicker" style="color:#102028">Доступ</div>
+    <h2>Хочешь протестировать такой же безлимит?</h2>
+    <p>Я собрал отдельную инструкцию: как подключиться, что генерировать первым и как выжимать максимум из месячного доступа.</p>
+    <a class="btn" href="YOUR_LINK_HERE" target="_blank" rel="noopener">Получить инструкцию →</a>
+    <div class="fine">Название платформы намеренно не указано на этой странице. Условия и доступность могут меняться — перед подключением проверяй актуальную информацию.</div>
+  </div>
+</div></section>
+</main>
+
+<footer class="footer"><div class="wrap footer-row"><div><b>AI VIDEO LAB</b> / independent test</div><div>Сделано как лёгкий статический сайт без внешних JS-библиотек.</div></div></footer>
+
+<audio id="autoAudio" src="assets/voice.mp3" preload="auto" autoplay></audio>
+
+<script src="app.js" defer></script>
+</body>
+</html>
