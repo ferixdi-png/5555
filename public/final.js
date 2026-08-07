@@ -6,6 +6,7 @@
   };
   loadCss('/compact.css');
   loadCss('/final-tight.css?v=20260807-clean-final');
+  loadCss('/mobile-video-fix.css?v=20260807-mobile-video');
 
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
