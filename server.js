@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-final-ai-companion';
+const APP_VERSION = '20260807-final-audited';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -14,9 +14,17 @@ const MIME = {
 };
 
 const recent = new Map();
+const BASE_HEADERS = {
+  'X-Content-Type-Options':'nosniff',
+  'Referrer-Policy':'strict-origin-when-cross-origin',
+  'X-Frame-Options':'SAMEORIGIN',
+  'Permissions-Policy':'camera=(), microphone=(), geolocation=()',
+  'Cross-Origin-Opener-Policy':'same-origin-allow-popups'
+};
+function headers(extra={}) { return {...BASE_HEADERS,'X-App-Version':APP_VERSION,...extra}; }
 function json(res, status, data) {
   const body = Buffer.from(JSON.stringify(data));
-  res.writeHead(status, {'Content-Type':'application/json; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store','X-App-Version':APP_VERSION});
+  res.writeHead(status, headers({'Content-Type':'application/json; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store'}));
   res.end(body);
 }
 function clean(value, max = 100) { return String(value || '').replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, max); }
@@ -35,8 +43,6 @@ async function readBody(req, maxBytes = 20000) {
   });
 }
 async function lead(req, res) {
-  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
-  if (limited(ip)) return json(res, 429, {error:'Слишком много заявок. Попробуйте позже.'});
   let data;
   try { data = JSON.parse((await readBody(req)) || '{}'); }
   catch { return json(res, 400, {error:'Некорректная заявка.'}); }
@@ -45,6 +51,9 @@ async function lead(req, res) {
   const consent = data.consent === true || data.consent === 'true' || data.consent === 'on';
   if (website) return json(res, 200, {ok:true});
   if (!consent || phone.length < 6) return json(res, 400, {error:'Укажите телефон и согласие на связь.'});
+
+  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+  if (limited(ip)) return json(res, 429, {error:'Слишком много заявок. Попробуйте позже.'});
 
   const token=process.env.TELEGRAM_BOT_TOKEN, chatId=process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) {
@@ -75,15 +84,15 @@ function availableVideos() {
 }
 
 function safeFile(urlPath) {
-  let decoded; try { decoded=decodeURIComponent(urlPath); } catch { return null; }
-  const normalized=path.normalize(decoded).replace(/^(\.\.(\/|\\|$))+/, '');
-  let file=path.join(PUBLIC, normalized);
-  if (!file.startsWith(PUBLIC)) return null;
+  let decoded;
+  try { decoded=decodeURIComponent(urlPath); } catch { return null; }
+  const stripped=decoded.replace(/^[/\\]+/,'');
+  const file=path.resolve(PUBLIC,stripped);
+  if (file !== PUBLIC && !file.startsWith(PUBLIC + path.sep)) return null;
 
-  if (/^[/\\]?videos[/\\]video-\d{2}\.mp4$/i.test(normalized) && !fs.existsSync(file)) {
-    const base=path.basename(normalized);
-    const rootVideo=path.join(__dirname,base);
-    if (fs.existsSync(rootVideo)) file=rootVideo;
+  if (/^videos[/\\]video-\d{2}\.mp4$/i.test(stripped) && !fs.existsSync(file)) {
+    const rootVideo=path.resolve(__dirname,path.basename(stripped));
+    if (fs.existsSync(rootVideo)) return rootVideo;
   }
   return file;
 }
@@ -95,67 +104,104 @@ function versionHtml(html) {
            .replace(/<link[^>]+experience-v2\.css[^>]*>\s*/g,'')
            .replace(/<script[^>]+experience-v2\.js[^>]*><\/script>\s*/g,'');
 
+  out = out.replace(/(href|src)="(\/[^"?#]+\.(?:css|js))"/g, (_m, attr, asset) => `${attr}="${asset}?v=${APP_VERSION}"`);
+
+  if (!out.includes('/why.css')) out = out.replace('</head>', '<link rel="stylesheet" href="/why.css">\n</head>');
+  if (!out.includes('/compact.css')) out = out.replace('</head>', '<link rel="stylesheet" href="/compact.css">\n</head>');
   if (!out.includes('/journey.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/journey.css?v=${APP_VERSION}">\n</head>`);
   if (!out.includes('/final-polish.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/final-polish.css?v=${APP_VERSION}">\n</head>`);
+  if (!out.includes('/audit-fixes.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/audit-fixes.css?v=${APP_VERSION}">\n</head>`);
   if (!out.includes('/journey.js')) out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
-  return out.replace(/(href|src)="(\/[^"?#]+\.(?:css|js))"/g, (_m, attr, asset) => `${attr}="${asset}?v=${APP_VERSION}"`);
+
+  out = out.replace('>Получить доступ</a>', '>Напиши мне — дам гайд</a>')
+           .replace('>Забрать реквизиты / задать вопрос<', '>Напиши мне — дам гайд<');
+  return out;
 }
 
-function serveHtml(res, file) {
+function serveHtml(req,res,file) {
   fs.readFile(file, 'utf8', (err, html) => {
     if (err) {
-      res.writeHead(500, {'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});
-      return res.end('index.html not found');
+      const body=Buffer.from('index.html not found');
+      res.writeHead(500,headers({'Content-Type':'text/plain; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store'}));
+      return req.method==='HEAD'?res.end():res.end(body);
     }
     const body = Buffer.from(versionHtml(html));
-    res.writeHead(200, {
+    res.writeHead(200, headers({
       'Content-Type':MIME['.html'], 'Content-Length':body.length,
       'Cache-Control':'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Pragma':'no-cache','Expires':'0','X-App-Version':APP_VERSION
-    });
+      'Pragma':'no-cache','Expires':'0'
+    }));
+    if(req.method==='HEAD') return res.end();
     res.end(body);
   });
+}
+
+function parseRange(range,size){
+  const m=/^bytes=(\d*)-(\d*)$/.exec(range||'');
+  if(!m) return null;
+  let start,end;
+  if(m[1]==='' && m[2]!==''){
+    const suffix=Number(m[2]);
+    if(!Number.isFinite(suffix)||suffix<=0) return null;
+    start=Math.max(0,size-suffix);end=size-1;
+  }else{
+    start=m[1]?Number(m[1]):0;
+    end=m[2]?Number(m[2]):size-1;
+    if(!Number.isFinite(start)||!Number.isFinite(end)) return null;
+    end=Math.min(end,size-1);
+  }
+  if(start<0||start>end||start>=size) return null;
+  return {start,end};
 }
 
 function serveFile(req,res,file){
   const ext=path.extname(file).toLowerCase();
   const requestedMedia=/\.(mp4|webm|mp3|wav)$/.test(ext);
+  const requestedAsset=/\.(css|js|json|svg|png|jpe?g|webp|ico|mp4|webm|mp3|wav)$/i.test(ext);
   fs.stat(file,(err,stat)=>{
     if(err || !stat.isFile()) {
-      if(requestedMedia){res.writeHead(404,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});return res.end('Media not found');}
-      return serveHtml(res, path.join(PUBLIC,'index.html'));
+      if(requestedAsset){
+        const body=Buffer.from('Not found');
+        res.writeHead(404,headers({'Content-Type':'text/plain; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store'}));
+        return req.method==='HEAD'?res.end():res.end(body);
+      }
+      return serveHtml(req,res,path.join(PUBLIC,'index.html'));
     }
-    if (ext === '.html') return serveHtml(res, file);
+    if (ext === '.html') return serveHtml(req,res,file);
 
     const type=MIME[ext] || 'application/octet-stream', range=req.headers.range;
     const isMedia=requestedMedia;
     const isCode=/\.(css|js)$/.test(ext);
     if(range && isMedia){
-      const m=/^bytes=(\d*)-(\d*)$/.exec(range);
-      if(!m){res.writeHead(416,{'Content-Range':`bytes */${stat.size}`});return res.end();}
-      const start=m[1]?Number(m[1]):0, end=m[2]?Math.min(Number(m[2]),stat.size-1):stat.size-1;
-      if(start>end || start>=stat.size){res.writeHead(416,{'Content-Range':`bytes */${stat.size}`});return res.end();}
-      res.writeHead(206,{'Content-Type':type,'Accept-Ranges':'bytes','Content-Range':`bytes ${start}-${end}/${stat.size}`,'Content-Length':end-start+1,'Cache-Control':'public, max-age=86400','X-App-Version':APP_VERSION});
+      const parsed=parseRange(range,stat.size);
+      if(!parsed){res.writeHead(416,headers({'Content-Range':`bytes */${stat.size}`,'Cache-Control':'no-store'}));return res.end();}
+      const {start,end}=parsed;
+      res.writeHead(206,headers({'Content-Type':type,'Accept-Ranges':'bytes','Content-Range':`bytes ${start}-${end}/${stat.size}`,'Content-Length':end-start+1,'Cache-Control':'public, max-age=3600'}));
+      if(req.method==='HEAD') return res.end();
       return fs.createReadStream(file,{start,end}).pipe(res);
     }
-    const cache = isCode ? 'no-store, no-cache, must-revalidate' : (isMedia ? 'public, max-age=86400' : 'public, max-age=3600');
-    res.writeHead(200,{'Content-Type':type,'Content-Length':stat.size,'Cache-Control':cache,'X-App-Version':APP_VERSION});
+    const cache = isCode ? 'no-store, no-cache, must-revalidate' : 'public, max-age=3600';
+    res.writeHead(200,headers({'Content-Type':type,'Content-Length':stat.size,'Cache-Control':cache,'Accept-Ranges':isMedia?'bytes':'none'}));
+    if(req.method==='HEAD') return res.end();
     fs.createReadStream(file).pipe(res);
   });
 }
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host || 'localhost'}`);
-  if(req.method==='GET' && url.pathname==='/healthz'){
-    res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store','X-App-Version':APP_VERSION});
-    return res.end(`ok ${APP_VERSION}`);
+  if(req.method==='GET' || req.method==='HEAD'){
+    if(url.pathname==='/healthz'){
+      const body=Buffer.from(`ok ${APP_VERSION}`);
+      res.writeHead(200,headers({'Content-Type':'text/plain; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store'}));
+      return req.method==='HEAD'?res.end():res.end(body);
+    }
+    if(url.pathname==='/version') return json(res,200,{version:APP_VERSION});
+    if(url.pathname==='/api/videos') return json(res,200,{videos:availableVideos()});
   }
-  if(req.method==='GET' && url.pathname==='/version') return json(res,200,{version:APP_VERSION});
-  if(req.method==='GET' && url.pathname==='/api/videos') return json(res,200,{videos:availableVideos()});
   if(req.method==='POST' && url.pathname==='/api/lead') return lead(req,res);
-  if(req.method!=='GET' && req.method!=='HEAD'){res.writeHead(405,{'Allow':'GET, HEAD, POST'});return res.end();}
+  if(req.method!=='GET' && req.method!=='HEAD'){res.writeHead(405,headers({'Allow':'GET, HEAD, POST','Cache-Control':'no-store'}));return res.end();}
   const pathname=url.pathname==='/'?'/index.html':url.pathname, file=safeFile(pathname);
-  if(!file){res.writeHead(400,{'Content-Type':'text/plain; charset=utf-8'});return res.end('Bad request');}
+  if(!file){res.writeHead(400,headers({'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'}));return res.end('Bad request');}
   serveFile(req,res,file);
 });
 server.listen(PORT,'0.0.0.0',()=>console.log(`Unlimited Video ${APP_VERSION} listening on :${PORT}`));
