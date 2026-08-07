@@ -1,0 +1,14 @@
+/* Cross-browser companion compatibility.
+   Some Chromium-family browsers on hybrid Windows devices report input and
+   reduced-motion capabilities differently. The signature companion remains
+   available everywhere; reduced-motion only makes it calmer. */
+@media (prefers-reduced-motion: reduce){
+  #journeyCanvas{display:block!important;opacity:.72!important}
+  body:before{display:block!important;opacity:.24!important}
+}
+
+#journeyCanvas{
+  visibility:visible!important;
+  pointer-events:none!important;
+  contain:strict;
+}
