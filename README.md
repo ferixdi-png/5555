@@ -1,25 +1,22 @@
-# AI Video Lab
+# Unlimited Video
 
-Лёгкий статический лендинг для Render.
+Интерактивный лендинг для Render Web Service.
 
-## Что заменить
+## Render (ручная настройка)
+- Language: Node
+- Branch: main
+- Root Directory: пусто
+- Build Command: `npm install`
+- Start Command: `npm start`
+- Instance Type: Free (для теста)
 
-- `YOUR_LINK_HERE` в `index.html` — ссылка на Telegram / магазин / инструкцию.
-- Видео положить в папку `videos/`:
-  - `cinematic.mp4`
-  - `ugc.mp4`
-  - `product.mp4`
-  - `viral.mp4`
-  - `lipsync.mp4`
-- Если нужна попытка автозапуска озвучки без кнопки, положить файл `assets/voice.mp3`.
+## Заявки с телефона
+Форма `/api/lead` отправляет заявки в Telegram через Bot API.
+В Render → Environment добавь:
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
 
-> Важно: браузеры могут блокировать autoplay со звуком до первого взаимодействия пользователя. Сайт всё равно пытается запустить `voice.mp3` автоматически.
+Сайт не записывает номера в файл/базу — он сразу пересылает заявку в Telegram.
 
-## Render
-
-Подключить репозиторий как **Static Site** или через Blueprint (`render.yaml`).
-
-- Build Command: `echo "No build required"`
-- Publish Directory: `.`
-
-Никаких внешних JS-библиотек, npm-сборки или CDN не требуется.
+## Видео
+См. `public/videos/README.md`.
