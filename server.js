@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-1150-companion-final';
+const APP_VERSION = '20260807-final-ai-companion';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
