@@ -6,8 +6,9 @@
   };
   loadCss('/compact.css');
   loadCss('/final-tight.css?v=20260807-clean-final');
-  loadCss('/mobile-video-fix.css?v=20260807-mobile-video');
+  loadCss('/mobile-video-fix.css?v=20260807-safe-player');
   loadCss('/browser-compat.css?v=20260807-pointer-compat');
+  loadCss('/final-center.css?v=20260807-center-final');
 
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -21,9 +22,11 @@
   const longP=$('#longform .section-head p');
   if(longP) longP.textContent='Один клип — 8 секунд. Итоговый ролик может быть любой длины: разбиваешь идею на сцены и соединяешь их в CapCut, Premiere, DaVinci или любом другом редакторе.';
 
+  const truthTitle=$('#truth .truth-copy h2');
   const truthParas=$$('#truth .truth-copy p');
-  if(truthParas[0]) truthParas[0].textContent='Сразу скажу как есть: в тяжёлой физике, сложных сценах и стабильности мелких деталей топовые модели вроде Seedance могут быть сильнее. Этот доступ не пытается заменить вообще все модели.';
-  if(truthParas[1]) truthParas[1].innerHTML='Но для UGC, рекламных креативов, красивых перебивок, мемных сцен, тестов идей и контента с русской речью связка <strong>1080p + 8 секунд + полный безлимит</strong> даёт очень много свободы.';
+  if(truthTitle) truthTitle.innerHTML='Seedance может быть сильнее.<br><em>Но за каждую попытку платишь.</em>';
+  if(truthParas[0]) truthParas[0].textContent='Да, в тяжёлой физике, сложных сценах и мелких деталях Seedance часто выглядит сильнее. Но экономика там совсем другая: кредиты, цена каждой новой генерации и дорогие перезапуски. Один удачный ролик после нескольких дублей легко начинает стоить как заметная часть месячного доступа.';
+  if(truthParas[1]) truthParas[1].innerHTML='И русская речь — не сильная сторона Seedance: lip-sync и короткие русские реплики заметно менее предсказуемы. Здесь ставка другая — <strong>1080p, рабочий русский lip-sync и полный безлимит на месяц</strong>, чтобы спокойно делать столько дублей, сколько нужно под UGC, рекламу, мемы, перебивки и тесты идей.';
 
   if(!$('.telegram-float')){
     const a=document.createElement('a');
@@ -52,7 +55,7 @@
 
   if(!document.querySelector('script[data-final-cleanup]')){
     const s=document.createElement('script');
-    s.src='/final-cleanup.js?v=20260807-clean-final';
+    s.src='/final-cleanup.js?v=20260807-center-final';
     s.async=false;
     s.dataset.finalCleanup='1';
     document.body.appendChild(s);
