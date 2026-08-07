@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-final-audit-stable';
+const APP_VERSION = '20260807-religantno-v2';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -113,6 +113,9 @@ function safeFile(urlPath) {
 
 function versionHtml(html) {
   let out = html;
+  out = out.replace(/Ferixdi/g,'Religantno')
+           .replace(/FERIXDI/g,'RELIGANTNO')
+           .replace(/ferixdiii/g,'religantno');
   out = out.replace(/<link[^>]+premium-motion\.css[^>]*>\s*/g,'')
            .replace(/<script[^>]+premium-motion\.js[^>]*><\/script>\s*/g,'')
            .replace(/<link[^>]+experience-v2\.css[^>]*>\s*/g,'')
