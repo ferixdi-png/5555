@@ -74,8 +74,10 @@
       const [tag,title]=labels[n-1]||['EXAMPLE',`Реальный пример ${num}`];
       const card=document.createElement('article');
       card.className='video-card'; card.tabIndex=0;
+      card.setAttribute('aria-label',`${title}, исходное видео 1080p, 8 секунд`);
       card.innerHTML=`
         <video src="/videos/${file}" muted loop playsinline preload="metadata"></video>
+        <div class="original-badge"><i></i>1080P <span>ORIGINAL</span></div>
         <div class="video-play"><i></i></div>
         <div class="video-label"><b>${title}</b><span>${tag} · 1080P · 8 SEC</span></div>`;
       const v=$('video',card);
