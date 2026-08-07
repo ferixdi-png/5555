@@ -1,7 +1,7 @@
 (() => {
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => [...r.querySelectorAll(s)];
-  const fine = matchMedia('(pointer:fine)').matches;
+  const fineHover = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const saveData = Boolean(navigator.connection?.saveData);
 
   const nav = $('#nav');
@@ -29,18 +29,113 @@
   ];
 
   const wall=$('#videoWall'), countEl=$('#videoCount'), empty=$('#emptyState');
-  const modal=$('#videoModal'), modalVideo=$('#modalVideo'), modalCaption=$('#modalCaption'), modalClose=$('#modalClose');
   const bgAudio=$('#autoAudio');
   let expected=0;
+
+  /* One cross-browser player for desktop and mobile. No <dialog>, no autoplay. */
+  const legacyModal=$('#videoModal');
+  if(legacyModal) legacyModal.remove();
+
+  const player=document.createElement('div');
+  player.className='safe-player';
+  player.setAttribute('aria-hidden','true');
+  player.innerHTML=`
+    <div class="safe-player-backdrop" data-close-player></div>
+    <div class="safe-player-shell" role="dialog" aria-modal="true" aria-label="Просмотр видео">
+      <button class="safe-player-close" type="button" data-close-player aria-label="Закрыть видео">×</button>
+      <div class="safe-player-stage">
+        <video class="safe-player-video" controls playsinline webkit-playsinline preload="metadata" disablepictureinpicture></video>
+        <button class="safe-player-play" type="button" aria-label="Воспроизвести видео"><span></span></button>
+        <div class="safe-player-loading">Загружаю видео…</div>
+        <div class="safe-player-error">
+          <strong>Не удалось загрузить видео</strong>
+          <a class="safe-player-direct" href="#" target="_blank" rel="noopener">Открыть видео отдельно ↗</a>
+        </div>
+      </div>
+      <div class="safe-player-caption"></div>
+    </div>`;
+  document.body.appendChild(player);
+
+  const playerVideo=$('.safe-player-video',player);
+  const playerPlay=$('.safe-player-play',player);
+  const playerCaption=$('.safe-player-caption',player);
+  const playerDirect=$('.safe-player-direct',player);
+  let currentSrc='';
+  let historyArmed=false;
+
+  function stopBgAudio(){
+    if(bgAudio && !bgAudio.paused){ bgAudio.dataset.resumeAfterVideo='1'; bgAudio.pause(); }
+  }
+  function resumeBgAudio(){
+    if(bgAudio?.dataset.resumeAfterVideo==='1'){
+      delete bgAudio.dataset.resumeAfterVideo;
+      bgAudio.play().catch(()=>{});
+    }
+  }
+  function resetPlayerMedia(){
+    playerVideo.pause();
+    playerVideo.removeAttribute('src');
+    playerVideo.load();
+    currentSrc='';
+    player.classList.remove('is-loading','is-ready','is-playing','is-error');
+  }
+  function closePlayer(fromPopState=false){
+    if(!player.classList.contains('is-open')) return;
+    player.classList.remove('is-open');
+    player.setAttribute('aria-hidden','true');
+    document.documentElement.classList.remove('video-player-open');
+    resetPlayerMedia();
+    resumeBgAudio();
+    if(historyArmed && !fromPopState){
+      historyArmed=false;
+      if(history.state?.videoPlayer) history.back();
+    } else historyArmed=false;
+  }
+  function openPlayer(src,caption){
+    if(!src) return;
+    stopBgAudio();
+    currentSrc=src;
+    playerCaption.textContent=caption;
+    playerDirect.href=src;
+    player.classList.add('is-open','is-loading');
+    player.classList.remove('is-ready','is-playing','is-error');
+    player.setAttribute('aria-hidden','false');
+    document.documentElement.classList.add('video-player-open');
+    playerVideo.src=src;
+    playerVideo.preload='metadata';
+    playerVideo.load();
+    if(!historyArmed){
+      try{ history.pushState({videoPlayer:true},''); historyArmed=true; }catch{}
+    }
+    setTimeout(()=>playerPlay?.focus({preventScroll:true}),40);
+  }
+
+  $$('[data-close-player]',player).forEach(el=>el.addEventListener('click',()=>closePlayer()));
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&player.classList.contains('is-open')) closePlayer();});
+  addEventListener('popstate',()=>{if(player.classList.contains('is-open')) closePlayer(true);});
+
+  playerPlay.addEventListener('click',()=>{
+    if(!currentSrc) return;
+    stopBgAudio();
+    const p=playerVideo.play();
+    if(p?.catch) p.catch(()=>{ player.classList.add('is-error'); });
+  });
+  playerVideo.addEventListener('loadstart',()=>player.classList.add('is-loading'));
+  playerVideo.addEventListener('loadedmetadata',()=>player.classList.add('is-ready'));
+  playerVideo.addEventListener('canplay',()=>player.classList.remove('is-loading','is-error'));
+  playerVideo.addEventListener('playing',()=>player.classList.add('is-playing'));
+  playerVideo.addEventListener('pause',()=>player.classList.remove('is-playing'));
+  playerVideo.addEventListener('ended',()=>player.classList.remove('is-playing'));
+  playerVideo.addEventListener('error',()=>{player.classList.remove('is-loading');player.classList.add('is-error');});
 
   function updateVideoState(){
     if(countEl) countEl.textContent=expected;
     if(empty) empty.style.display = expected===0 ? 'block' : 'none';
     const worksP=$('#works .section-head.split>p');
-    if(worksP && expected>0) worksP.textContent=`Здесь ${expected} моих реальных генераций из этого доступа. Все ролики — 1080p по 8 секунд. На компьютере наведи на карточку для превью, на телефоне просто нажми на ролик.`;
+    if(worksP && expected>0) worksP.textContent=`Здесь ${expected} моих реальных генераций. Все ролики — 1080p по 8 секунд. Нажми на карточку, затем на Play — плеер работает одинаково на телефоне и компьютере.`;
   }
 
-  function setCardSource(card, video, mode='metadata'){
+  function attachPreviewSource(card,video,mode='metadata'){
     if(video.dataset.sourceAttached) return;
     const src=card.dataset.src;
     if(!src) return;
@@ -50,64 +145,22 @@
     video.load();
   }
 
-  const mediaIO = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
-    entries.forEach(e => {
+  const mediaIO='IntersectionObserver' in window ? new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
       if(!e.isIntersecting) return;
-      const card=e.target;
-      const v=$('video',card);
-      if(v && !saveData) setCardSource(card,v,'metadata');
+      const card=e.target, v=$('video',card);
+      if(v && !saveData) attachPreviewSource(card,v,'metadata');
       mediaIO.unobserve(card);
     });
-  },{rootMargin:fine?'360px 0px':'180px 0px',threshold:.01}) : null;
-
-  function primeFrame(v){
-    if(v.dataset.framePrimed) return;
-    v.dataset.framePrimed='1';
-    try{
-      const seek=()=>{
-        try{ if(Number.isFinite(v.duration) && v.duration>.1) v.currentTime=Math.min(.35,v.duration*.06); }catch{}
-      };
-      if(v.readyState>=1) seek(); else v.addEventListener('loadedmetadata',seek,{once:true});
-    }catch{}
-  }
+  },{rootMargin:fineHover?'320px 0px':'100px 0px',threshold:.01}) : null;
 
   function previewPlay(card,v){
-    if(!fine) return;
-    setCardSource(card,v,'auto');
-    primeFrame(v);
+    if(!fineHover) return;
+    attachPreviewSource(card,v,'metadata');
     $$('.video-card video').forEach(other=>{if(other!==v) other.pause();});
-    v.play().catch(()=>{});
+    const p=v.play(); if(p?.catch) p.catch(()=>{});
   }
-  function previewPause(v){ if(fine) v.pause(); }
-
-  function modalIsOpen(){ return Boolean(modal?.open || modal?.hasAttribute('data-fallback-open')); }
-  function showModalSafe(){
-    if(!modal) return false;
-    if(typeof modal.showModal==='function') modal.showModal();
-    else { modal.setAttribute('open',''); modal.setAttribute('data-fallback-open','1'); document.documentElement.classList.add('modal-open'); }
-    return true;
-  }
-  function closeModal(){
-    if(!modal) return;
-    if(typeof modal.close==='function' && modal.open) modal.close();
-    else { modal.removeAttribute('open'); modal.removeAttribute('data-fallback-open'); document.documentElement.classList.remove('modal-open'); }
-    if(modalVideo){ modalVideo.pause(); modalVideo.removeAttribute('src'); modalVideo.load(); }
-    modal?.classList.remove('is-loading','is-error');
-    if(bgAudio?.dataset.resumeAfterModal==='1'){
-      delete bgAudio.dataset.resumeAfterModal;
-      bgAudio.play().catch(()=>{});
-    }
-  }
-  modalClose?.addEventListener('click',closeModal);
-  modal?.addEventListener('click',e=>{if(e.target===modal) closeModal();});
-  addEventListener('keydown',e=>{if(e.key==='Escape' && modalIsOpen()) closeModal();});
-
-  if(modalVideo){
-    modalVideo.addEventListener('loadstart',()=>modal?.classList.add('is-loading'));
-    modalVideo.addEventListener('canplay',()=>modal?.classList.remove('is-loading','is-error'));
-    modalVideo.addEventListener('playing',()=>modal?.classList.remove('is-loading','is-error'));
-    modalVideo.addEventListener('error',()=>{ modal?.classList.remove('is-loading'); modal?.classList.add('is-error'); });
-  }
+  function previewPause(v){ if(fineHover) v.pause(); }
 
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   async function discoverVideos(){
@@ -120,13 +173,9 @@
           const list=data.videos.filter(x=>/^video-\d{2}\.mp4$/i.test(x));
           if(list.length) return list;
         }
-      }catch(err){
-        if(attempt===2) console.warn('Video discovery failed',err);
-      }
+      }catch(err){ if(attempt===2) console.warn('Video discovery failed',err); }
       await wait(250*(attempt+1));
     }
-    // The current project contains 12 numbered videos. This fallback keeps the
-    // gallery usable if the discovery request is briefly interrupted on mobile.
     return Array.from({length:12},(_,i)=>`video-${String(i+1).padStart(2,'0')}.mp4`);
   }
 
@@ -143,64 +192,28 @@
       const src=`/videos/${file}`;
       const card=document.createElement('article');
       card.className='video-card'; card.tabIndex=0; card.dataset.src=src;
-      card.setAttribute('aria-label',`${title}, исходное видео 1080p, 8 секунд`);
+      card.setAttribute('role','button');
+      card.setAttribute('aria-label',`${title}. Открыть видео 1080p, 8 секунд`);
       card.innerHTML=`
         <video muted loop playsinline webkit-playsinline preload="none"></video>
         <div class="original-badge"><i></i>1080P <span>ORIGINAL</span></div>
         <div class="video-play"><i></i></div>
         <div class="video-label"><b>${title}</b><span>${tag} · 1080P · 8 SEC</span></div>`;
       const v=$('video',card);
-
-      v.addEventListener('loadedmetadata',()=>{ card.dataset.ready='1'; primeFrame(v); },{once:true});
       v.addEventListener('loadeddata',()=>card.classList.add('has-frame'),{once:true});
       v.addEventListener('error',()=>card.classList.add('media-error'));
-
-      if(mediaIO) mediaIO.observe(card);
-      else if(!saveData) setCardSource(card,v,'metadata');
-
-      if(fine){
+      if(mediaIO) mediaIO.observe(card); else if(!saveData) attachPreviewSource(card,v,'metadata');
+      if(fineHover){
         card.addEventListener('mouseenter',()=>previewPlay(card,v));
         card.addEventListener('mouseleave',()=>previewPause(v));
         card.addEventListener('focusin',()=>previewPlay(card,v));
         card.addEventListener('focusout',()=>previewPause(v));
       }
-
-      const open=()=>{
-        if(!modal || !modalVideo) return;
-        v.pause();
-        if(bgAudio && !bgAudio.paused){
-          bgAudio.dataset.resumeAfterModal='1';
-          bgAudio.pause();
-        }
-        modalCaption.textContent=`${num} / ${title} · 1080P · 8 SEC`;
-        if(!showModalSafe()) return;
-        modal.classList.add('is-loading');
-        modalVideo.src=src;
-        modalVideo.preload='auto';
-        modalVideo.load();
-        const p=modalVideo.play();
-        if(p?.catch) p.catch(()=>{});
-      };
+      const open=()=>{ v.pause(); openPlayer(src,`${num} / ${title} · 1080P · 8 SEC`); };
       card.addEventListener('click',open);
       card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
       wall.appendChild(card);
     });
   }
   buildGallery();
-
-  const form=$('#leadForm'), status=$('#formStatus');
-  form?.addEventListener('submit', async e=>{
-    e.preventDefault(); status.className='form-status'; status.textContent='';
-    const data=Object.fromEntries(new FormData(form).entries());
-    if(data.website) return;
-    if(!data.phone || !form.elements.consent.checked){status.classList.add('err');status.textContent='Укажи номер телефона и поставь согласие на связь.';return;}
-    form.classList.add('loading'); form.querySelector('button').disabled=true;
-    try{
-      const res=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:data.name||'',phone:data.phone,consent:true,website:''})});
-      const body=await res.json().catch(()=>({})); if(!res.ok) throw new Error(body.error||'Не удалось отправить');
-      form.reset();status.classList.add('ok');status.textContent='Готово. Заявка отправлена — я свяжусь с тобой.';
-    }catch(err){
-      status.classList.add('err');status.innerHTML='Не получилось отправить автоматически. Напиши напрямую в Telegram: <a href="https://t.me/ferixdiii" target="_blank">@ferixdiii</a>';
-    }finally{form.classList.remove('loading');form.querySelector('button').disabled=false;}
-  });
 })();
