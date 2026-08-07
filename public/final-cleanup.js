@@ -5,6 +5,7 @@
 
   function run(){
     $('#why')?.remove();
+    $('.nav-links a[href="#why"]')?.remove();
     $('.hero-tg')?.remove();
     $('.marquee')?.remove();
     $('.price-line')?.remove();
