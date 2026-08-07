@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-ferixdi-final';
+const APP_VERSION = '20260807-final-audit-stable';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -120,13 +120,26 @@ function versionHtml(html) {
 
   out = out.replace(/(href|src)="(\/[^"?#]+\.(?:css|js))"/g, (_m, attr, asset) => `${attr}="${asset}?v=${APP_VERSION}"`);
 
-  if (!out.includes('/why.css')) out = out.replace('</head>', '<link rel="stylesheet" href="/why.css">\n</head>');
-  if (!out.includes('/compact.css')) out = out.replace('</head>', '<link rel="stylesheet" href="/compact.css">\n</head>');
-  if (!out.includes('/journey.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/journey.css?v=${APP_VERSION}">\n</head>`);
-  if (!out.includes('/final-polish.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/final-polish.css?v=${APP_VERSION}">\n</head>`);
-  if (!out.includes('/audit-fixes.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/audit-fixes.css?v=${APP_VERSION}">\n</head>`);
-  if (!out.includes('/ferixdi.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/ferixdi.css?v=${APP_VERSION}">\n</head>`);
-  if (!out.includes('/journey.js')) out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
+  const injectCss = asset => {
+    if (!out.includes(asset)) out = out.replace('</head>', `<link rel="stylesheet" href="${asset}?v=${APP_VERSION}">\n</head>`);
+  };
+  injectCss('/why.css');
+  injectCss('/compact.css');
+  injectCss('/journey.css');
+  injectCss('/final-polish.css');
+  injectCss('/audit-fixes.css');
+  injectCss('/ferixdi.css');
+  injectCss('/final-tight.css');
+  injectCss('/mobile-video-fix.css');
+  injectCss('/browser-compat.css');
+  injectCss('/final-center.css');
+
+  if (!out.includes('/final-cleanup.js')) {
+    out = out.replace('</body>', `<script src="/final-cleanup.js?v=${APP_VERSION}" defer data-final-cleanup="1"></script>\n</body>`);
+  }
+  if (!out.includes('/journey.js')) {
+    out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
+  }
   return out;
 }
 
