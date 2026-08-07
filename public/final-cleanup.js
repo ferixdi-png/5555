@@ -4,7 +4,6 @@
   const tg='https://t.me/ferixdiii?text='+encodeURIComponent('Хочу безлимит');
 
   function run(){
-    // Remove legacy/duplicated sales blocks. The same information is now stated compactly.
     $('#why')?.remove();
     $('.hero-tg')?.remove();
     $('.marquee')?.remove();
@@ -51,7 +50,6 @@
     const contactTrigger=$('.contact-trigger strong');
     if(contactTrigger) contactTrigger.textContent='«Хочу безлимит»';
 
-    // Every Telegram conversion path opens the same clear pre-filled message.
     [navCta,primary,$('.button-telegram'),$('.telegram-float'),$('.expert-actions .button-primary'),$('.audience-bottom .button')].filter(Boolean).forEach(a=>{
       a.href=tg;a.target='_blank';a.rel='noopener';
     });
@@ -60,10 +58,13 @@
     const floating=$('.telegram-float');
     if(floating) floating.innerHTML='<span>Хочу безлимит <small>написать Ferixdi в Telegram</small></span>';
 
-    // Promotional images contain their own typography. Never place site text on top of them.
     $$('.audience-photo,.expert-photo,.hero-author-card').forEach(box=>box.classList.add('full-art'));
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run,{once:true}); else run();
+  run();
+  document.addEventListener('DOMContentLoaded',run,{once:true});
+  addEventListener('load',run,{once:true});
+  setTimeout(run,80);
+  setTimeout(run,500);
   addEventListener('resize',()=>{const a=$('.nav-cta');if(a)a.textContent=innerWidth<520?'Подключить ↗':'Подключить за 1 000 ₽';},{passive:true});
 })();
