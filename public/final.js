@@ -6,6 +6,7 @@
   };
   loadCss('/why.css');
   loadCss('/compact.css');
+  loadCss('/final-tight.css?v=20260807-final-tight');
 
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -67,7 +68,6 @@
     community.parentNode.insertBefore(why,community);
   }
 
-  // Telegram is the primary conversation path. The phone form remains optional.
   const contactText=$('#contact .contact-copy>p');
   if(contactText) contactText.textContent='Просто напиши мне в Telegram — отправлю гайд, объясню, как всё устроено, и расскажу, как я сделал ролики на этой странице. Если удобнее голосом — можешь оставить номер справа.';
   const tgBtn=$('.button-telegram');
@@ -82,7 +82,6 @@
     document.body.appendChild(a);
   }
 
-  // Small quality badge on real videos. No animation.
   requestAnimationFrame(()=>{
     $$('.video-card').forEach((card,i)=>{
       if($('.original-badge',card)) return;
@@ -93,12 +92,20 @@
     });
   });
 
-  // Keep the previously requested audio behavior without adding visual controls.
   const audio=$('#autoAudio');
   if(audio){
     audio.volume=.9;
     const tryPlay=()=>audio.play().catch(()=>{});
     addEventListener('load',tryPlay,{once:true});
     ['pointerdown','touchstart','keydown','scroll'].forEach(evt=>addEventListener(evt,tryPlay,{once:true,passive:true}));
+  }
+
+  // Final audit pass loads after the legacy conversion layer and normalizes duplicates.
+  if(!document.querySelector('script[data-final-cleanup]')){
+    const s=document.createElement('script');
+    s.src='/final-cleanup.js?v=20260807-final-tight';
+    s.async=false;
+    s.dataset.finalCleanup='1';
+    document.body.appendChild(s);
   }
 })();
