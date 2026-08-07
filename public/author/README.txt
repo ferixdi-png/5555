@@ -1,0 +1,1 @@
+Ferixdi author images used by the landing page. WebP assets are optimized for responsive web delivery.
