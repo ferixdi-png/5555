@@ -6,6 +6,19 @@
 .telegram-float{position:fixed!important;z-index:70!important}
 main,footer{position:relative;z-index:4}
 
+/* The floating CTA must be self-contained. Its old base styling used to come from
+   a legacy UX layer that is intentionally no longer loaded. */
+.telegram-float{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;
+  max-width:min(330px,calc(100vw - 28px));min-height:52px;padding:9px 17px!important;
+  border:1px solid rgba(255,255,255,.16)!important;border-radius:18px!important;
+  background:linear-gradient(110deg,#dfff68,#72eaff)!important;color:#071014!important;
+  text-decoration:none!important;font-weight:900!important;
+  box-shadow:0 18px 54px rgba(104,232,255,.16),0 10px 36px rgba(0,0,0,.28)!important;
+}
+.telegram-float span{display:flex!important;flex-direction:column!important;line-height:1.12!important;font-size:11px!important}
+.telegram-float small{display:block!important;margin-top:3px!important;font-size:8px!important;font-weight:700!important;opacity:.58!important}
+
 /* The AI companion is the only persistent decorative motion. Keep functional
    loading animation, but freeze legacy ambient loops that survived in base CSS. */
 .portal,.portal:before,.portal-ring,.orbit-dot,.float-card,.logo-orb,
@@ -46,6 +59,7 @@ a,button,.video-card{touch-action:manipulation}
   section[id]{scroll-margin-top:64px}
   .video-play i{width:46px!important;height:46px!important}
   .video-play i:after{border-width:6px 0 6px 9px!important}
+  .telegram-float{max-width:none!important}
 }
 
 @media(max-width:390px){
