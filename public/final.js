@@ -4,6 +4,11 @@
   whyCss.href = '/why.css';
   document.head.appendChild(whyCss);
 
+  const compactCss = document.createElement('link');
+  compactCss.rel = 'stylesheet';
+  compactCss.href = '/compact.css';
+  document.head.appendChild(compactCss);
+
   const $ = (s, r=document) => r.querySelector(s);
   const navLinks = $('.nav-links');
   if (navLinks && !navLinks.querySelector('a[href="#why"]')) navLinks.insertAdjacentHTML('beforeend','<a href="#why">Зачем</a>');
