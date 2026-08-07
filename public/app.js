@@ -2,6 +2,7 @@
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => [...r.querySelectorAll(s)];
   const fine = matchMedia('(pointer:fine)').matches;
+  const saveData = Boolean(navigator.connection?.saveData);
 
   const nav = $('#nav');
   const onScroll = () => nav?.classList.toggle('scrolled', scrollY > 24);
@@ -29,45 +30,79 @@
 
   const wall=$('#videoWall'), countEl=$('#videoCount'), empty=$('#emptyState');
   const modal=$('#videoModal'), modalVideo=$('#modalVideo'), modalCaption=$('#modalCaption'), modalClose=$('#modalClose');
-  let loaded=0, checked=0, expected=0;
-
-  const primeIO = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if(!e.isIntersecting) return;
-      const v=e.target;
-      if(v.dataset.primed) return primeIO.unobserve(v);
-      v.dataset.primed='1';
-      v.preload='auto';
-      try{ if(v.duration>.05) v.currentTime=Math.min(1.15,v.duration*.16); }catch{}
-      primeIO.unobserve(v);
-    });
-  },{rootMargin:'420px 0px',threshold:.01}) : null;
+  let expected=0;
 
   function updateVideoState(){
-    if(countEl) countEl.textContent=expected||loaded;
-    if(empty) empty.style.display = expected===0 || (checked>=expected&&loaded===0) ? 'block' : 'none';
+    if(countEl) countEl.textContent=expected;
+    if(empty) empty.style.display = expected===0 ? 'block' : 'none';
     const worksP=$('#works .section-head.split>p');
-    if(worksP && expected>0) worksP.textContent=`Здесь ${expected} моих реальных генераций из этого доступа. Все ролики — 1080p по 8 секунд. На компьютере наведи на карточку для превью, на телефоне просто открой её крупно.`;
+    if(worksP && expected>0) worksP.textContent=`Здесь ${expected} моих реальных генераций из этого доступа. Все ролики — 1080p по 8 секунд. На компьютере наведи на карточку для превью, на телефоне просто нажми на ролик.`;
   }
 
-  function prime(v){
-    if(v.dataset.primed) return;
-    v.dataset.primed='1'; v.preload='auto';
-    try{ if(v.duration>.05) v.currentTime=Math.min(1.15,v.duration*.16); }catch{}
+  function setCardSource(card, video, mode='metadata'){
+    if(video.dataset.sourceAttached) return;
+    const src=card.dataset.src;
+    if(!src) return;
+    video.dataset.sourceAttached='1';
+    video.preload=mode;
+    video.src=src;
+    video.load();
   }
+
+  const mediaIO = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      const card=e.target;
+      const v=$('video',card);
+      if(v && !saveData) setCardSource(card,v,'metadata');
+      mediaIO.unobserve(card);
+    });
+  },{rootMargin:fine?'360px 0px':'180px 0px',threshold:.01}) : null;
+
+  function primeFrame(v){
+    if(v.dataset.framePrimed) return;
+    v.dataset.framePrimed='1';
+    try{
+      const seek=()=>{
+        try{ if(Number.isFinite(v.duration) && v.duration>.1) v.currentTime=Math.min(.35,v.duration*.06); }catch{}
+      };
+      if(v.readyState>=1) seek(); else v.addEventListener('loadedmetadata',seek,{once:true});
+    }catch{}
+  }
+
   function previewPlay(card,v){
-    if(!fine||!card.dataset.ready) return;
-    prime(v); $$('.video-card video').forEach(other=>{if(other!==v) other.pause();}); v.play().catch(()=>{});
+    if(!fine) return;
+    setCardSource(card,v,'auto');
+    primeFrame(v);
+    $$('.video-card video').forEach(other=>{if(other!==v) other.pause();});
+    v.play().catch(()=>{});
   }
   function previewPause(v){ if(fine) v.pause(); }
 
+  function modalIsOpen(){ return Boolean(modal?.open || modal?.hasAttribute('data-fallback-open')); }
+  function showModalSafe(){
+    if(!modal) return false;
+    if(typeof modal.showModal==='function') modal.showModal();
+    else { modal.setAttribute('open',''); modal.setAttribute('data-fallback-open','1'); document.documentElement.classList.add('modal-open'); }
+    return true;
+  }
   function closeModal(){
-    if(modal?.open) modal.close();
-    if(modalVideo){modalVideo.pause();modalVideo.removeAttribute('src');modalVideo.load();}
+    if(!modal) return;
+    if(typeof modal.close==='function' && modal.open) modal.close();
+    else { modal.removeAttribute('open'); modal.removeAttribute('data-fallback-open'); document.documentElement.classList.remove('modal-open'); }
+    if(modalVideo){ modalVideo.pause(); modalVideo.removeAttribute('src'); modalVideo.load(); }
+    modal?.classList.remove('is-loading','is-error');
   }
   modalClose?.addEventListener('click',closeModal);
   modal?.addEventListener('click',e=>{if(e.target===modal) closeModal();});
-  addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
+  addEventListener('keydown',e=>{if(e.key==='Escape' && modalIsOpen()) closeModal();});
+
+  if(modalVideo){
+    modalVideo.addEventListener('loadstart',()=>modal?.classList.add('is-loading'));
+    modalVideo.addEventListener('canplay',()=>modal?.classList.remove('is-loading','is-error'));
+    modalVideo.addEventListener('playing',()=>modal?.classList.remove('is-loading','is-error'));
+    modalVideo.addEventListener('error',()=>{ modal?.classList.remove('is-loading'); modal?.classList.add('is-error'); });
+  }
 
   async function discoverVideos(){
     try{
@@ -75,43 +110,56 @@
       if(!res.ok) throw new Error('discovery failed');
       const data=await res.json();
       if(Array.isArray(data.videos)) return data.videos.filter(x=>/^video-\d{2}\.mp4$/i.test(x));
-    }catch{}
-    return Array.from({length:20},(_,i)=>`video-${String(i+1).padStart(2,'0')}.mp4`);
+    }catch(err){ console.warn('Video discovery failed',err); }
+    return [];
   }
 
   async function buildGallery(){
     if(!wall) return;
-    wall.innerHTML=''; loaded=0; checked=0;
-    const files=await discoverVideos(); expected=files.length; updateVideoState();
+    wall.innerHTML='';
+    const files=await discoverVideos();
+    expected=files.length; updateVideoState();
 
     files.forEach((file,index)=>{
       const m=/video-(\d{2})\.mp4/i.exec(file),num=m?m[1]:String(index+1).padStart(2,'0');
       const n=Math.max(1,Number(num));
       const [tag,title]=labels[n-1]||['EXAMPLE',`Реальный пример ${num}`];
+      const src=`/videos/${file}`;
       const card=document.createElement('article');
-      card.className='video-card'; card.tabIndex=0;
+      card.className='video-card'; card.tabIndex=0; card.dataset.src=src;
       card.setAttribute('aria-label',`${title}, исходное видео 1080p, 8 секунд`);
       card.innerHTML=`
-        <video src="/videos/${file}" muted loop playsinline preload="metadata"></video>
+        <video muted loop playsinline webkit-playsinline preload="none"></video>
         <div class="original-badge"><i></i>1080P <span>ORIGINAL</span></div>
         <div class="video-play"><i></i></div>
         <div class="video-label"><b>${title}</b><span>${tag} · 1080P · 8 SEC</span></div>`;
       const v=$('video',card);
-      v.addEventListener('loadedmetadata',()=>{
-        loaded++;checked++;card.dataset.ready='1';updateVideoState();
-        if(primeIO) primeIO.observe(v); else prime(v);
-      },{once:true});
-      v.addEventListener('error',()=>{checked++;card.remove();updateVideoState();},{once:true});
+
+      v.addEventListener('loadedmetadata',()=>{ card.dataset.ready='1'; primeFrame(v); },{once:true});
+      v.addEventListener('loadeddata',()=>card.classList.add('has-frame'),{once:true});
+      v.addEventListener('error',()=>card.classList.add('media-error'));
+
+      if(mediaIO) mediaIO.observe(card);
+      else if(!saveData) setCardSource(card,v,'metadata');
+
       if(fine){
         card.addEventListener('mouseenter',()=>previewPlay(card,v));
         card.addEventListener('mouseleave',()=>previewPause(v));
         card.addEventListener('focusin',()=>previewPlay(card,v));
         card.addEventListener('focusout',()=>previewPause(v));
       }
+
       const open=()=>{
-        if(!card.dataset.ready||!modal?.showModal) return;
-        v.pause(); modalVideo.src=v.currentSrc||v.src; modalCaption.textContent=`${num} / ${title} · 1080P · 8 SEC`;
-        modal.showModal(); modalVideo.currentTime=0; modalVideo.play().catch(()=>{});
+        if(!modal || !modalVideo) return;
+        v.pause();
+        modalCaption.textContent=`${num} / ${title} · 1080P · 8 SEC`;
+        if(!showModalSafe()) return;
+        modal.classList.add('is-loading');
+        modalVideo.src=src;
+        modalVideo.preload='auto';
+        modalVideo.load();
+        const p=modalVideo.play();
+        if(p?.catch) p.catch(()=>{});
       };
       card.addEventListener('click',open);
       card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
