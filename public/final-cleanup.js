@@ -2,6 +2,30 @@
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
   const tg='https://t.me/religantno?text='+encodeURIComponent('Хочу безлимит');
+  const brand='Religantno';
+
+  function scrubOldBrand(){
+    const meta=document.querySelector('meta[name="description"]');
+    if(meta) meta.content=meta.content.replace(/Ferixdi/gi,brand);
+
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    const nodes=[];
+    while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node=>{
+      if(/Ferixdi/i.test(node.nodeValue||'')) node.nodeValue=node.nodeValue.replace(/Ferixdi/gi,brand);
+    });
+
+    $$('[alt],[title],[aria-label]').forEach(el=>{
+      ['alt','title','aria-label'].forEach(attr=>{
+        const value=el.getAttribute(attr);
+        if(value && /Ferixdi/i.test(value)) el.setAttribute(attr,value.replace(/Ferixdi/gi,brand));
+      });
+    });
+
+    $$('a[href*="t.me/ferixdiii"],a[href*="t.me/religantno"]').forEach(a=>{
+      a.href=tg;a.target='_blank';a.rel='noopener';
+    });
+  }
 
   function run(){
     // Remove legacy or redundant blocks completely.
@@ -39,16 +63,15 @@
     if(secondary){secondary.textContent='Смотреть реальные видео';secondary.href='#works';secondary.removeAttribute('target');}
 
     const trigger=$('.hero-trigger span');
-    if(trigger) trigger.innerHTML='Хочешь забрать доступ или есть вопросы? <b>Просто напиши мне «Хочу безлимит»</b>. Я лично объясню подключение и покажу, как всё устроено.';
+    if(trigger) trigger.innerHTML='Хочешь забрать доступ или есть вопросы? <b>Просто напиши «Хочу безлимит»</b>. Объясню подключение и покажу, как всё устроено.';
 
     const navCta=$('.nav-cta');
     if(navCta){navCta.href=tg;navCta.target='_blank';navCta.rel='noopener';navCta.textContent=innerWidth<520?'Забрать ↗':'Забрать за 1 990 ₽';}
 
-    // Authoritative copy: this is a tool used in real work, not a one-off test.
     const lipTitle=$('#lipsync .voice-copy h2');
     const lipP=$('#lipsync .voice-copy p');
     if(lipTitle) lipTitle.innerHTML='Русский lip-sync — <em>рабочий инструмент.</em>';
-    if(lipP) lipP.textContent='Русский lip-sync здесь работает уверенно для коротких реплик, UGC, мини-диалогов, объясняющих сцен и роликов с говорящими персонажами. Это один из сценариев, для которых я регулярно использую этот доступ.';
+    if(lipP) lipP.textContent='Русский lip-sync здесь работает уверенно для коротких реплик, UGC, мини-диалогов, объясняющих сцен и роликов с говорящими персонажами.';
 
     const audienceTitle=$('#audience .section-head h2');
     const audienceP=$('#audience .section-head p');
@@ -63,7 +86,7 @@
     const expertTrigger=$('.message-trigger strong');
     if(expertTrigger) expertTrigger.textContent='Просто напиши: «Хочу безлимит»';
     const expertButton=$('.expert-actions .button-primary');
-    if(expertButton){expertButton.textContent='Забрать доступ у Ferixdi ↗';expertButton.href=tg;expertButton.target='_blank';expertButton.rel='noopener';}
+    if(expertButton){expertButton.textContent='Забрать доступ у Religantno ↗';expertButton.href=tg;expertButton.target='_blank';expertButton.rel='noopener';}
 
     const audienceButton=$('.audience-bottom .button');
     if(audienceButton){audienceButton.textContent='Спросить про доступ →';audienceButton.href=tg;audienceButton.target='_blank';audienceButton.rel='noopener';}
@@ -73,9 +96,10 @@
     });
 
     const floating=$('.telegram-float');
-    if(floating) floating.innerHTML='<span>Хочу безлимит <small>написать Ferixdi в Telegram</small></span>';
+    if(floating) floating.innerHTML='<span>Хочу безлимит <small>написать @religantno в Telegram</small></span>';
 
     $$('.audience-photo,.expert-photo,.hero-author-card').forEach(box=>box.classList.add('full-art'));
+    scrubOldBrand();
   }
 
   run();
