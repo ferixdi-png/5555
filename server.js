@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-1120-journey';
+const APP_VERSION = '20260807-1138-cursor-ribbon';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -64,8 +64,6 @@ function safeFile(urlPath) {
   let file=path.join(PUBLIC, normalized);
   if (!file.startsWith(PUBLIC)) return null;
 
-  // Convenience for GitHub web uploads: video-01.mp4…video-20.mp4 can live either
-  // in public/videos/ or in the repository root. The public URL stays /videos/...
   if (/^[/\\]?videos[/\\]video-\d{2}\.mp4$/i.test(normalized) && !fs.existsSync(file)) {
     const base=path.basename(normalized);
     const rootVideo=path.join(__dirname,base);
