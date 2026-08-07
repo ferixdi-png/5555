@@ -48,9 +48,15 @@
   const audio=$('#autoAudio');
   if(audio){
     audio.volume=.9;
-    const tryPlay=()=>audio.play().catch(()=>{});
-    addEventListener('load',tryPlay,{once:true});
-    ['pointerdown','touchstart','keydown','scroll'].forEach(evt=>addEventListener(evt,tryPlay,{once:true,passive:true}));
+    const desktopMedia=matchMedia('(hover:hover) and (pointer:fine)').matches;
+    if(desktopMedia){
+      const tryPlay=()=>audio.play().catch(()=>{});
+      addEventListener('load',tryPlay,{once:true});
+      ['pointerdown','keydown','scroll'].forEach(evt=>addEventListener(evt,tryPlay,{once:true,passive:true}));
+    }else{
+      audio.pause();
+      audio.autoplay=false;
+    }
   }
 
   if(!document.querySelector('script[data-final-cleanup]')){
