@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-1138-cursor-ribbon';
+const APP_VERSION = '20260807-1150-companion-final';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -58,6 +58,22 @@ async function lead(req, res) {
     return json(res, 200, {ok:true});
   } catch (err) { console.error('Lead delivery error:', err); return json(res, 502, {error:'Не удалось отправить заявку.'}); }
 }
+
+function availableVideos() {
+  const found = new Set();
+  const scan = dir => {
+    try {
+      for (const name of fs.readdirSync(dir)) {
+        const m=/^video-(\d{2})\.mp4$/i.exec(name);
+        if (m) found.add(Number(m[1]));
+      }
+    } catch {}
+  };
+  scan(path.join(PUBLIC,'videos'));
+  scan(__dirname);
+  return [...found].filter(n=>n>0&&n<100).sort((a,b)=>a-b).map(n=>`video-${String(n).padStart(2,'0')}.mp4`);
+}
+
 function safeFile(urlPath) {
   let decoded; try { decoded=decodeURIComponent(urlPath); } catch { return null; }
   const normalized=path.normalize(decoded).replace(/^(\.\.(\/|\\|$))+/, '');
@@ -80,6 +96,7 @@ function versionHtml(html) {
            .replace(/<script[^>]+experience-v2\.js[^>]*><\/script>\s*/g,'');
 
   if (!out.includes('/journey.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/journey.css?v=${APP_VERSION}">\n</head>`);
+  if (!out.includes('/final-polish.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/final-polish.css?v=${APP_VERSION}">\n</head>`);
   if (!out.includes('/journey.js')) out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
   return out.replace(/(href|src)="(\/[^"?#]+\.(?:css|js))"/g, (_m, attr, asset) => `${attr}="${asset}?v=${APP_VERSION}"`);
 }
@@ -101,13 +118,17 @@ function serveHtml(res, file) {
 }
 
 function serveFile(req,res,file){
+  const ext=path.extname(file).toLowerCase();
+  const requestedMedia=/\.(mp4|webm|mp3|wav)$/.test(ext);
   fs.stat(file,(err,stat)=>{
-    if(err || !stat.isFile()) return serveHtml(res, path.join(PUBLIC,'index.html'));
-    const ext=path.extname(file).toLowerCase();
+    if(err || !stat.isFile()) {
+      if(requestedMedia){res.writeHead(404,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});return res.end('Media not found');}
+      return serveHtml(res, path.join(PUBLIC,'index.html'));
+    }
     if (ext === '.html') return serveHtml(res, file);
 
     const type=MIME[ext] || 'application/octet-stream', range=req.headers.range;
-    const isMedia=/\.(mp4|webm|mp3|wav)$/.test(ext);
+    const isMedia=requestedMedia;
     const isCode=/\.(css|js)$/.test(ext);
     if(range && isMedia){
       const m=/^bytes=(\d*)-(\d*)$/.exec(range);
@@ -130,6 +151,7 @@ const server=http.createServer(async(req,res)=>{
     return res.end(`ok ${APP_VERSION}`);
   }
   if(req.method==='GET' && url.pathname==='/version') return json(res,200,{version:APP_VERSION});
+  if(req.method==='GET' && url.pathname==='/api/videos') return json(res,200,{videos:availableVideos()});
   if(req.method==='POST' && url.pathname==='/api/lead') return lead(req,res);
   if(req.method!=='GET' && req.method!=='HEAD'){res.writeHead(405,{'Allow':'GET, HEAD, POST'});return res.end();}
   const pathname=url.pathname==='/'?'/index.html':url.pathname, file=safeFile(pathname);
