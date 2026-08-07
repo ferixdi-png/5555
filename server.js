@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-1115-journey';
+const APP_VERSION = '20260807-1120-journey';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -61,24 +61,28 @@ async function lead(req, res) {
 function safeFile(urlPath) {
   let decoded; try { decoded=decodeURIComponent(urlPath); } catch { return null; }
   const normalized=path.normalize(decoded).replace(/^(\.\.(\/|\\|$))+/, '');
-  const file=path.join(PUBLIC, normalized);
-  return file.startsWith(PUBLIC) ? file : null;
+  let file=path.join(PUBLIC, normalized);
+  if (!file.startsWith(PUBLIC)) return null;
+
+  // Convenience for GitHub web uploads: video-01.mp4…video-20.mp4 can live either
+  // in public/videos/ or in the repository root. The public URL stays /videos/...
+  if (/^[/\\]?videos[/\\]video-\d{2}\.mp4$/i.test(normalized) && !fs.existsSync(file)) {
+    const base=path.basename(normalized);
+    const rootVideo=path.join(__dirname,base);
+    if (fs.existsSync(rootVideo)) file=rootVideo;
+  }
+  return file;
 }
 
 function versionHtml(html) {
   let out = html;
-  // Remove legacy runtime-injected motion layers if they were ever committed manually.
   out = out.replace(/<link[^>]+premium-motion\.css[^>]*>\s*/g,'')
            .replace(/<script[^>]+premium-motion\.js[^>]*><\/script>\s*/g,'')
            .replace(/<link[^>]+experience-v2\.css[^>]*>\s*/g,'')
            .replace(/<script[^>]+experience-v2\.js[^>]*><\/script>\s*/g,'');
 
-  if (!out.includes('/journey.css')) {
-    out = out.replace('</head>', `<link rel="stylesheet" href="/journey.css?v=${APP_VERSION}">\n</head>`);
-  }
-  if (!out.includes('/journey.js')) {
-    out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
-  }
+  if (!out.includes('/journey.css')) out = out.replace('</head>', `<link rel="stylesheet" href="/journey.css?v=${APP_VERSION}">\n</head>`);
+  if (!out.includes('/journey.js')) out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
   return out.replace(/(href|src)="(\/[^"?#]+\.(?:css|js))"/g, (_m, attr, asset) => `${attr}="${asset}?v=${APP_VERSION}"`);
 }
 
@@ -90,12 +94,9 @@ function serveHtml(res, file) {
     }
     const body = Buffer.from(versionHtml(html));
     res.writeHead(200, {
-      'Content-Type':MIME['.html'],
-      'Content-Length':body.length,
+      'Content-Type':MIME['.html'], 'Content-Length':body.length,
       'Cache-Control':'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Pragma':'no-cache',
-      'Expires':'0',
-      'X-App-Version':APP_VERSION
+      'Pragma':'no-cache','Expires':'0','X-App-Version':APP_VERSION
     });
     res.end(body);
   });
@@ -110,19 +111,14 @@ function serveFile(req,res,file){
     const type=MIME[ext] || 'application/octet-stream', range=req.headers.range;
     const isMedia=/\.(mp4|webm|mp3|wav)$/.test(ext);
     const isCode=/\.(css|js)$/.test(ext);
-
     if(range && isMedia){
       const m=/^bytes=(\d*)-(\d*)$/.exec(range);
       if(!m){res.writeHead(416,{'Content-Range':`bytes */${stat.size}`});return res.end();}
       const start=m[1]?Number(m[1]):0, end=m[2]?Math.min(Number(m[2]),stat.size-1):stat.size-1;
       if(start>end || start>=stat.size){res.writeHead(416,{'Content-Range':`bytes */${stat.size}`});return res.end();}
-      res.writeHead(206,{
-        'Content-Type':type,'Accept-Ranges':'bytes','Content-Range':`bytes ${start}-${end}/${stat.size}`,
-        'Content-Length':end-start+1,'Cache-Control':'public, max-age=86400','X-App-Version':APP_VERSION
-      });
+      res.writeHead(206,{'Content-Type':type,'Accept-Ranges':'bytes','Content-Range':`bytes ${start}-${end}/${stat.size}`,'Content-Length':end-start+1,'Cache-Control':'public, max-age=86400','X-App-Version':APP_VERSION});
       return fs.createReadStream(file,{start,end}).pipe(res);
     }
-
     const cache = isCode ? 'no-store, no-cache, must-revalidate' : (isMedia ? 'public, max-age=86400' : 'public, max-age=3600');
     res.writeHead(200,{'Content-Type':type,'Content-Length':stat.size,'Cache-Control':cache,'X-App-Version':APP_VERSION});
     fs.createReadStream(file).pipe(res);
