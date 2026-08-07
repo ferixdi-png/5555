@@ -1,7 +1,11 @@
 (() => {
+  const whyCss = document.createElement('link');
+  whyCss.rel = 'stylesheet';
+  whyCss.href = '/why.css';
+  document.head.appendChild(whyCss);
+
   const $ = (s, r=document) => r.querySelector(s);
 
-  // Финальная редактура текста: меньше рекламных штампов, больше личного объяснения.
   const discovery = $('.discovery-badge');
   if (discovery) discovery.textContent = 'НАШЁЛ ВАРИАНТ, КОТОРЫМ САМ ПОЛЬЗУЮСЬ ↓';
 
@@ -41,7 +45,6 @@
   const contactText = $('#contact .contact-copy > p');
   if (contactText) contactText.textContent = 'Если интересно — оставь номер или напиши мне в Telegram. Я сам объясню, как всё устроено, покажу нюансы и скажу, подойдёт ли тебе такой вариант под твои задачи. Без менеджеров и длинной переписки.';
 
-  // Новый авторский блок «Зачем тебе это».
   const community = $('.community');
   if (community && !$('#why')) {
     const why = document.createElement('section');
@@ -53,48 +56,13 @@
         <h2>Не просто «поиграться с нейронкой».<br><em>Это рабочая творческая среда.</em></h2>
         <p>Я бы смотрел на такой безлимит не как на одну конкретную модель, а как на возможность постоянно что-то пробовать. Чем больше вариантов ты можешь сделать без страха потратить кредиты, тем быстрее находишь идеи, которые реально цепляют.</p>
       </div>
-
       <div class="why-grid">
-        <article class="why-card reveal visible tilt why-creative">
-          <span class="why-index">01</span>
-          <div class="why-icon">✦</div>
-          <h3>Для творчества</h3>
-          <p>Можно проверять странные идеи, визуальные образы, необычных персонажей и сцены, которые ты бы не стал тестировать, если бы каждая попытка стоила денег.</p>
-          <div class="why-tags"><b>идеи</b><b>визуал</b><b>эксперименты</b></div>
-        </article>
-
-        <article class="why-card reveal visible tilt why-sales">
-          <span class="why-index">02</span>
-          <div class="why-icon">↗</div>
-          <h3>Для продающих видео</h3>
-          <p>Делать UGC, товарные сцены, первые три секунды рекламного креатива, разные офферы и несколько визуальных вариантов под один продукт — а потом оставлять тот, который выглядит сильнее.</p>
-          <div class="why-tags"><b>UGC</b><b>ads</b><b>product</b></div>
-        </article>
-
-        <article class="why-card reveal visible tilt why-speed">
-          <span class="why-index">03</span>
-          <div class="why-icon">∞</div>
-          <h3>Для скорости работы</h3>
-          <p>Когда клиенту нужны варианты, не приходится долго защищать один-единственный дубль. Можно быстро сделать серию направлений, показать выбор и двигаться дальше.</p>
-          <div class="why-tags"><b>варианты</b><b>клиенты</b><b>быстрее</b></div>
-        </article>
-
-        <article class="why-card reveal visible tilt why-skill">
-          <span class="why-index">04</span>
-          <div class="why-icon">◉</div>
-          <h3>Для собственного роста</h3>
-          <p>Насмотренность и навык промптинга растут только через практику. Сто генераций дают больше понимания камеры, света и композиции, чем десять сохранённых туториалов.</p>
-          <div class="why-tags"><b>насмотренность</b><b>prompting</b><b>практика</b></div>
-        </article>
+        <article class="why-card reveal visible tilt why-creative"><span class="why-index">01</span><div class="why-icon">✦</div><h3>Для творчества</h3><p>Можно проверять странные идеи, визуальные образы, необычных персонажей и сцены, которые ты бы не стал тестировать, если бы каждая попытка стоила денег.</p><div class="why-tags"><b>идеи</b><b>визуал</b><b>эксперименты</b></div></article>
+        <article class="why-card reveal visible tilt why-sales"><span class="why-index">02</span><div class="why-icon">↗</div><h3>Для продающих видео</h3><p>Делать UGC, товарные сцены, первые три секунды рекламного креатива, разные офферы и несколько визуальных вариантов под один продукт — а потом оставлять тот, который выглядит сильнее.</p><div class="why-tags"><b>UGC</b><b>ads</b><b>product</b></div></article>
+        <article class="why-card reveal visible tilt why-speed"><span class="why-index">03</span><div class="why-icon">∞</div><h3>Для скорости работы</h3><p>Когда клиенту нужны варианты, не приходится долго защищать один-единственный дубль. Можно быстро сделать серию направлений, показать выбор и двигаться дальше.</p><div class="why-tags"><b>варианты</b><b>клиенты</b><b>быстрее</b></div></article>
+        <article class="why-card reveal visible tilt why-skill"><span class="why-index">04</span><div class="why-icon">◉</div><h3>Для собственного роста</h3><p>Насмотренность и навык промптинга растут только через практику. Сто генераций дают больше понимания камеры, света и композиции, чем десять сохранённых туториалов.</p><div class="why-tags"><b>насмотренность</b><b>prompting</b><b>практика</b></div></article>
       </div>
-
-      <div class="why-bottom reveal visible">
-        <div class="why-bottom-mark">100×</div>
-        <div>
-          <strong>Главная ценность — не в том, что можно нажать «Generate» бесконечно.</strong>
-          <p>Ценность в том, что ты можешь перебрать десятки решений и найти одно, которое действительно стоит публиковать, показывать клиенту или использовать в рекламе.</p>
-        </div>
-      </div>
+      <div class="why-bottom reveal visible"><div class="why-bottom-mark">100×</div><div><strong>Главная ценность — не в том, что можно нажать «Generate» бесконечно.</strong><p>Ценность в том, что ты можешь перебрать десятки решений и найти одно, которое действительно стоит публиковать, показывать клиенту или использовать в рекламе.</p></div></div>
     `;
     community.parentNode.insertBefore(why, community);
   }
