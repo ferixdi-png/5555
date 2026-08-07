@@ -1,0 +1,27 @@
+/* Mobile video reliability only — no visual redesign */
+.video-card{position:relative;background:#080a0f}
+.video-card video{background:#080a0f}
+.video-card:not(.has-frame) .video-play{opacity:.82!important}
+.video-card:not(.has-frame) .video-play:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(104,232,255,.07),transparent 38%);pointer-events:none}
+.video-card.media-error .video-play{opacity:1!important}
+.video-card.media-error .video-play i:before{content:"↻";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:16px;font-style:normal}
+.video-card.media-error .video-play i:after{display:none!important}
+
+.video-modal{position:relative}
+.video-modal.is-loading:before{content:"Загружаю видео…";position:absolute;left:50%;top:50%;z-index:8;transform:translate(-50%,-50%);padding:9px 13px;border-radius:999px;background:rgba(5,7,11,.82);border:1px solid rgba(255,255,255,.12);color:#d9dde5;font-size:11px;letter-spacing:.04em;pointer-events:none;backdrop-filter:blur(12px)}
+.video-modal.is-error:before{content:"Видео не загрузилось. Попробуй открыть ещё раз.";color:#fff}
+.video-modal.is-loading video{min-height:min(56vw,520px);background:#05070b}
+
+/* Fallback for browsers with incomplete dialog support. */
+.video-modal[data-fallback-open]{display:block!important;position:fixed!important;inset:50% auto auto 50%!important;transform:translate(-50%,-50%)!important;z-index:1000!important;margin:0!important}
+.video-modal[data-fallback-open]:after{content:"";position:fixed;inset:-100vh -100vw;z-index:-1;background:rgba(0,0,0,.78)}
+html.modal-open{overflow:hidden}
+
+@media(max-width:680px){
+  .video-card{aspect-ratio:16/9!important;min-height:0!important}
+  .video-play{opacity:.78!important;pointer-events:none}
+  .video-play i{box-shadow:0 10px 32px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.08)}
+  .video-modal{width:calc(100vw - 18px)!important;max-width:none!important;max-height:88svh!important}
+  .video-modal video{width:100%!important;max-height:72svh!important;object-fit:contain!important}
+  .modal-caption{font-size:10px!important;padding:10px 12px!important}
+}
