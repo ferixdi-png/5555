@@ -1,14 +1,18 @@
 (() => {
   const loadCss = href => {
-    if (document.querySelector(`link[href="${href}"]`)) return;
+    const base=href.split('?')[0];
+    const exists=[...document.querySelectorAll('link[rel="stylesheet"]')].some(link=>{
+      try{return new URL(link.href,location.href).pathname===base;}catch{return false;}
+    });
+    if(exists) return;
     const l=document.createElement('link');
     l.rel='stylesheet';l.href=href;document.head.appendChild(l);
   };
-  loadCss('/compact.css');
-  loadCss('/final-tight.css?v=20260807-clean-final');
-  loadCss('/mobile-video-fix.css?v=20260807-safe-player');
-  loadCss('/browser-compat.css?v=20260807-pointer-compat');
-  loadCss('/final-center.css?v=20260807-center-final');
+  loadCss('/compact.css?v=20260807-final-audit');
+  loadCss('/final-tight.css?v=20260807-final-audit');
+  loadCss('/mobile-video-fix.css?v=20260807-final-audit');
+  loadCss('/browser-compat.css?v=20260807-final-audit');
+  loadCss('/final-center.css?v=20260807-final-audit');
 
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -61,7 +65,7 @@
 
   if(!document.querySelector('script[data-final-cleanup]')){
     const s=document.createElement('script');
-    s.src='/final-cleanup.js?v=20260807-center-final';
+    s.src='/final-cleanup.js?v=20260807-final-audit';
     s.async=false;
     s.dataset.finalCleanup='1';
     document.body.appendChild(s);
