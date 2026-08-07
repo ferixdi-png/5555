@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050509">
+  <meta name="description" content="Полный безлимит AI-видеогенерации на месяц: без кредитов и счетчиков. Реальные примеры, русский lip-sync и длинные ролики через склейку сцен.">
+  <title>UNLIMITED VIDEO — полный безлимит AI-видео</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <canvas id="shader" aria-hidden="true"></canvas>
+  <div class="aurora" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <nav class="nav" id="nav">
+    <a class="logo" href="#top" aria-label="На главную">
+      <span class="logo-orb"></span><span>UNLIMITED<span class="lime">/VIDEO</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#unlimited">Безлимит</a>
+      <a href="#works">Примеры</a>
+      <a href="#longform">Длинные ролики</a>
+      <a href="#truth">Честно</a>
+    </div>
+    <a class="nav-cta magnet" href="#contact">Получить доступ</a>
+  </nav>
+
+  <main id="top">
+    <header class="hero">
+      <div class="hero-copy reveal">
+        <div class="status-pill"><i></i> ДОСТУП НА МЕСЯЦ • ПОЛНЫЙ БЕЗЛИМИТ</div>
+        <h1>
+          <span class="line">ГЕНЕРИРУЙ.</span>
+          <span class="line outline">НЕ СЧИТАЙ.</span>
+        </h1>
+        <p class="hero-lead">Не «много кредитов». Не «пакет попыток». <strong>Полный безлимит на генерацию видео на месяц</strong> — запускаешь столько генераций, сколько нужно, и перестаёшь думать, сколько осталось.</p>
+        <div class="hero-actions">
+          <a class="button button-primary magnet" href="#works">Смотреть реальные видео <span>↘</span></a>
+          <a class="button button-ghost" href="#contact">Хочу подключиться</a>
+        </div>
+        <div class="micro-proof">
+          <span><b>0</b> кредитов считать</span>
+          <span><b>0</b> дневных пакетов</span>
+          <span><b>∞</b> пространство для тестов</span>
+        </div>
+      </div>
+
+      <div class="hero-art reveal" aria-hidden="true">
+        <div class="portal">
+          <div class="portal-ring r1"></div>
+          <div class="portal-ring r2"></div>
+          <div class="portal-ring r3"></div>
+          <div class="portal-core"><span>∞</span></div>
+          <div class="orbit-dot d1"></div>
+          <div class="orbit-dot d2"></div>
+          <div class="orbit-dot d3"></div>
+        </div>
+        <div class="float-card fc1 tilt"><small>FULL MODE</small><b>UNLIMITED</b><span>без кредитов</span></div>
+        <div class="float-card fc2 tilt"><small>VOICE</small><b>RU LIP-SYNC</b><span>русская речь</span></div>
+        <div class="float-card fc3 tilt"><small>STORY</small><b>60+ SEC</b><span>через склейку сцен</span></div>
+      </div>
+
+      <a class="scroll-down" href="#unlimited"><span></span> листай</a>
+    </header>
+
+    <section id="unlimited" class="unlimited section">
+      <div class="section-head reveal">
+        <div class="kicker">01 — САМОЕ ГЛАВНОЕ</div>
+        <h2>Безлимит здесь означает <em>безлимит.</em></h2>
+        <p>Весь смысл доступа — убрать из процесса внутренний калькулятор. Не выбирать «стоит ли тратить генерацию», а делать ещё дубль, ещё ракурс, ещё идею — пока не получишь то, что нужно.</p>
+      </div>
+
+      <div class="zero-grid">
+        <article class="zero-card reveal tilt">
+          <div class="big-zero">0</div>
+          <h3>Кредитов</h3>
+          <p>Не надо следить за балансом и высчитывать стоимость каждой попытки.</p>
+        </article>
+        <article class="zero-card reveal tilt">
+          <div class="big-zero">0</div>
+          <h3>Страха перегенерировать</h3>
+          <p>Не понравился результат — меняешь промпт и запускаешь ещё раз.</p>
+        </article>
+        <article class="zero-card reveal tilt accent">
+          <div class="infinity">∞</div>
+          <h3>Идей</h3>
+          <p>Реальное ограничение быстро смещается с кредитов на твою фантазию.</p>
+        </article>
+      </div>
+
+      <div class="marquee reveal" aria-label="Преимущества">
+        <div class="marquee-track">
+          <span>UGC</span><i>✦</i><span>REELS</span><i>✦</i><span>РУССКИЙ LIP-SYNC</span><i>✦</i><span>РЕКЛАМА</span><i>✦</i><span>МЕМЫ</span><i>✦</i><span>CINEMATIC</span><i>✦</i><span>STORYTELLING</span><i>✦</i>
+          <span>UGC</span><i>✦</i><span>REELS</span><i>✦</i><span>РУССКИЙ LIP-SYNC</span><i>✦</i><span>РЕКЛАМА</span><i>✦</i><span>МЕМЫ</span><i>✦</i><span>CINEMATIC</span><i>✦</i><span>STORYTELLING</span><i>✦</i>
+        </div>
+      </div>
+    </section>
+
+    <section id="works" class="works section">
+      <div class="section-head split reveal">
+        <div>
+          <div class="kicker">02 — РЕАЛЬНЫЕ РЕЗУЛЬТАТЫ</div>
+          <h2>Не обещания.<br><em>Вот что получается.</em></h2>
+        </div>
+        <p>Ниже — реальные генерации. Я специально хочу собрать здесь 15–20 разных роликов: люди, предметка, абсурд, киношные сцены, речь, реклама. Нажми на любое видео — откроется крупно.</p>
+      </div>
+
+      <div class="video-meta reveal">
+        <div><strong id="videoCount">0</strong><span>загружено примеров</span></div>
+        <div class="live-dot"><i></i> библиотека обновляется</div>
+      </div>
+
+      <div class="video-wall" id="videoWall"></div>
+
+      <div class="empty-state" id="emptyState">
+        <span>＋</span>
+        <strong>Добавь свои первые ролики</strong>
+        <p>Назови файлы video-01.mp4, video-02.mp4 и так далее — сайт подхватит их автоматически.</p>
+      </div>
+    </section>
+
+    <section id="lipsync" class="lipsync section">
+      <div class="voice-stage reveal">
+        <div class="voice-copy">
+          <div class="kicker">03 — РУССКАЯ РЕЧЬ</div>
+          <h2>Говорить по-русски — <em>не проблема.</em></h2>
+          <p>По моим тестам русский lip-sync работает очень достойно. Это делает доступ полезным не только для красивых перебивок, но и для UGC, диалогов, мини-сценок и контента, где персонаж должен реально говорить.</p>
+          <div class="voice-points">
+            <span>RU VOICE <b>✓</b></span>
+            <span>LIP-SYNC <b>✓</b></span>
+            <span>UGC READY <b>✓</b></span>
+          </div>
+        </div>
+        <div class="wave-box">
+          <div class="wave-sphere">
+            <div class="sphere-grid"></div>
+            <div class="mouth-line"></div>
+          </div>
+          <div class="waveform" id="waveform"></div>
+          <small>RUSSIAN SPEECH SIGNAL / LIVE</small>
+        </div>
+      </div>
+    </section>
+
+    <section id="longform" class="longform section">
+      <div class="section-head reveal">
+        <div class="kicker">04 — ДЛИННЫЕ РОЛИКИ</div>
+        <h2>Одна генерация короткая.<br><em>История — сколько захочешь.</em></h2>
+        <p>Делаешь сцену за сценой, сохраняешь направление героя и локации, а потом склеиваешь всё в один ролик. Так можно собирать рекламу, истории и мини-фильмы на 30, 60, 90 секунд и больше.</p>
+      </div>
+
+      <div class="timeline-stage reveal">
+        <div class="timeline-line"><span id="timelineProgress"></span></div>
+        <div class="timeline-cards">
+          <article><b>01</b><span>HOOK</span><p>Зацепить первым кадром</p></article>
+          <article><b>02</b><span>SETUP</span><p>Задать героя и контекст</p></article>
+          <article><b>03</b><span>ACTION</span><p>Продолжить сцену</p></article>
+          <article><b>04</b><span>VOICE</span><p>Добавить реплику</p></article>
+          <article><b>05</b><span>TURN</span><p>Сделать поворот</p></article>
+          <article><b>06</b><span>FINAL</span><p>Собрать концовку</p></article>
+        </div>
+        <div class="timeline-result">
+          <span>короткие сцены</span><b>→</b><strong>ОДИН ДЛИННЫЙ РОЛИК</strong>
+        </div>
+      </div>
+    </section>
+
+    <section id="truth" class="truth section">
+      <div class="truth-card reveal">
+        <div class="truth-number">05</div>
+        <div class="truth-copy">
+          <div class="kicker">ЧЕСТНО О КАЧЕСТВЕ</div>
+          <h2>Это не уровень <em>Seedance.</em><br>И я не буду делать вид, что это так.</h2>
+          <p>По детализации, стабильности сложных сцен и общей мощности топовые модели могут быть сильнее. Но здесь совсем другая ценность: <strong>ты получаешь огромную свободу эксперимента за небольшую месячную стоимость.</strong></p>
+          <p>Для UGC, рекламных креативов, русской речи, простых киношных сцен, мемов, перебивок, тестов гипотез и длинных историй через склейку — этого уже хватает для очень многих задач.</p>
+          <div class="truth-badge">НЕ МАГИЯ. ПРОСТО ОЧЕНЬ МНОГО ПОПЫТОК.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ideas section">
+      <div class="section-head reveal">
+        <div class="kicker">06 — ЧТО С ЭТИМ ДЕЛАТЬ</div>
+        <h2>Дальше ограничение — <em>фантазия.</em></h2>
+      </div>
+      <div class="idea-grid">
+        <article class="idea-card reveal tilt"><span>01</span><h3>UGC для бизнеса</h3><p>Персонаж, продукт, короткая русская реплика и несколько дублей.</p></article>
+        <article class="idea-card reveal tilt"><span>02</span><h3>Рекламные креативы</h3><p>Быстро тестировать визуальные идеи без страха «сжечь» кредиты.</p></article>
+        <article class="idea-card reveal tilt"><span>03</span><h3>Вирусные ролики</h3><p>Абсурдные ситуации, животные, POV, CCTV, мемные сценарии.</p></article>
+        <article class="idea-card reveal tilt"><span>04</span><h3>Киношные вставки</h3><p>Атмосферный B-roll, продуктовые кадры, города, природа.</p></article>
+        <article class="idea-card reveal tilt"><span>05</span><h3>Истории 60+ секунд</h3><p>Делить сюжет на сцены и собирать длинный ролик монтажом.</p></article>
+        <article class="idea-card reveal tilt"><span>06</span><h3>Просто экспериментировать</h3><p>Самая недооценённая часть безлимита — пробовать то, на что раньше было жалко попыток.</p></article>
+      </div>
+    </section>
+
+    <section id="contact" class="contact section">
+      <div class="contact-shell reveal">
+        <div class="contact-copy">
+          <div class="kicker">ПОДКЛЮЧЕНИЕ</div>
+          <h2>Хочешь такой же <em>полный безлимит?</em></h2>
+          <p>Оставь номер — я свяжусь с тобой и нормально объясню, что это за доступ, кому он подходит и как подключиться. Без сложных форм и регистрации.</p>
+          <div class="price-line"><span>доступ на месяц</span><strong>≈ 1 000 ₽</strong></div>
+          <div class="contact-or"><span>или</span></div>
+          <a class="telegram button button-telegram magnet" href="https://t.me/ferixdiii" target="_blank" rel="noopener">
+            <span class="tg-icon">↗</span>
+            Сразу написать в Telegram
+            <small>@ferixdiii</small>
+          </a>
+        </div>
+
+        <form class="lead-form" id="leadForm" novalidate>
+          <div class="form-label">ОБРАТНЫЙ ЗВОНОК</div>
+          <label>
+            <span>Как тебя зовут?</span>
+            <input name="name" type="text" maxlength="60" placeholder="Имя">
+          </label>
+          <label>
+            <span>Номер телефона *</span>
+            <input name="phone" type="tel" maxlength="30" required inputmode="tel" placeholder="+7 999 123-45-67">
+          </label>
+          <input class="hp" tabindex="-1" autocomplete="off" name="website" aria-hidden="true">
+          <label class="consent">
+            <input type="checkbox" name="consent" required>
+            <span>Соглашаюсь на обработку номера телефона только для связи по вопросу подключения.</span>
+          </label>
+          <button class="button button-primary submit magnet" type="submit">
+            <span class="submit-text">Перезвоните мне</span>
+            <span class="submit-loader"></span>
+          </button>
+          <div class="form-status" id="formStatus" role="status"></div>
+          <p class="form-note">Номер не публикуется на сайте. Заявка отправляется владельцу страницы.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div><strong>UNLIMITED/VIDEO</strong><span>Независимая демонстрация результатов.</span></div>
+    <a href="https://t.me/ferixdiii" target="_blank" rel="noopener">@ferixdiii</a>
+  </footer>
+
+  <dialog id="videoModal" class="video-modal">
+    <button class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
+    <video id="modalVideo" playsinline controls></video>
+    <div class="modal-caption" id="modalCaption"></div>
+  </dialog>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
