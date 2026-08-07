@@ -1,0 +1,58 @@
+/* FINAL AUDIT FIXES — stability only, no new visual concept */
+
+/* journey.css intentionally lifts content above its ambient glow, but it must not
+   change the positioning model of fixed UI. */
+.nav{position:fixed!important;z-index:60!important}
+.telegram-float{position:fixed!important;z-index:70!important}
+main,footer{position:relative;z-index:4}
+
+/* The AI companion is the only persistent decorative motion. Keep functional
+   loading animation, but freeze legacy ambient loops that survived in base CSS. */
+.portal,.portal:before,.portal-ring,.orbit-dot,.float-card,.logo-orb,
+.status-pill i,.scroll-down span:after,.marquee-track,.wave-sphere,.mouth-line,.waveform i{
+  animation:none!important;
+}
+
+/* The long-form diagram is a completed explanatory sequence, not an unfinished
+   scroll-progress widget. */
+.timeline-line span{width:100%!important}
+
+/* Fixed nav must not cover anchored section headings. */
+section[id]{scroll-margin-top:78px}
+
+/* Keyboard/touch reliability. */
+a:focus-visible,button:focus-visible,input:focus-visible,.video-card:focus-visible{
+  outline:2px solid var(--lime)!important;
+  outline-offset:3px!important;
+}
+.video-card:focus-visible .video-play{opacity:1!important}
+a,button,.video-card{touch-action:manipulation}
+
+/* If backdrop-filter is unavailable, preserve contrast instead of becoming too transparent. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .nav.scrolled,.zero-card,.video-card,.tech-flow article,.tech-callout,.voice-stage,
+  .timeline-stage,.truth-card,.why-card,.why-bottom,.community-card,.contact-shell,
+  .button-ghost,.quality-banner{background-color:rgba(8,10,15,.94)!important}
+}
+
+@media(hover:none){
+  /* Touch users need an obvious affordance because there is no hover state. */
+  .video-play{opacity:.72!important}
+}
+
+@media(max-width:680px){
+  /* Mobile hero is no longer viewport-height, so this desktop scroll cue can overlap content. */
+  .scroll-down{display:none!important}
+  section[id]{scroll-margin-top:64px}
+  .video-play i{width:46px!important;height:46px!important}
+  .video-play i:after{border-width:6px 0 6px 9px!important}
+}
+
+@media(max-width:390px){
+  .nav{padding-left:10px!important;padding-right:10px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  #journeyCanvas{display:none!important}
+  body:before{display:none!important}
+}
