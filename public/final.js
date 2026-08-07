@@ -16,7 +16,7 @@
 
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-  const tg='https://t.me/ferixdiii?text='+encodeURIComponent('Хочу безлимит');
+  const tg='https://t.me/religantno?text='+encodeURIComponent('Хочу безлимит');
 
   ['#scrollStory','#kineticBand','.velocity-ticker','.e2-manifesto','.e2-rail','#why'].forEach(sel=>$$(sel).forEach(el=>el.remove()));
   $('.nav-links a[href="#why"]')?.remove();
