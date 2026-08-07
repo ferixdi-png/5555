@@ -1,22 +1,48 @@
-# Unlimited Video
+# Unlimited Video — final
 
-Интерактивный лендинг для Render Web Service.
+Интерактивный лендинг под Render Web Service.
 
-## Render (ручная настройка)
-- Language: Node
-- Branch: main
-- Root Directory: пусто
-- Build Command: `npm install`
-- Start Command: `npm start`
-- Instance Type: Free (для теста)
+## Render — настройки
 
-## Заявки с телефона
-Форма `/api/lead` отправляет заявки в Telegram через Bot API.
-В Render → Environment добавь:
+- Language: `Node`
+- Branch: `main`
+- Root Directory: оставить пустым
+- Build Command: `echo "No build required"`
+- Start Command: `node server.js`
+- Instance Type: `Free` для теста
+
+После каждого изменения в `main` Render сможет автоматически обновлять сайт.
+
+## Реальные видео
+
+Все примеры лежат в `public/videos/`.
+Сайт автоматически ищет:
+
+`video-01.mp4` … `video-20.mp4`
+
+Подробности — в `public/videos/README.md`.
+
+## Качество
+
+Сервер не транскодирует видео. Он отдаёт загруженный MP4 как исходный файл и поддерживает HTTP Range для нормальной перемотки. Если загрузить исходник 1920×1080, сайт не уменьшает его разрешение. Финальное визуальное качество всё равно зависит от исходного файла, кодека, битрейта, экрана и браузера посетителя.
+
+## Автоаудио
+
+Если нужен фоновый голос, загрузи файл:
+
+`public/audio/voice.mp3`
+
+Сайт пытается запустить его автоматически. Браузеры могут блокировать autoplay со звуком до пользовательского взаимодействия — это браузерное ограничение.
+
+## Заявки с телефона → Telegram
+
+Форма `/api/lead` пересылает заявку в Telegram через Bot API.
+В Render → Environment добавь две переменные:
+
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 
-Сайт не записывает номера в файл/базу — он сразу пересылает заявку в Telegram.
+Секреты не нужно хранить в GitHub. Номер не записывается в файл или базу сайта: сервер принимает заявку и пересылает её в Telegram.
 
-## Видео
-См. `public/videos/README.md`.
+Прямая кнопка связи уже ведёт на `@ferixdiii`.
+Чат сообщества уже ведёт на `https://t.me/ai_neiro_chat`.
