@@ -1,7 +1,7 @@
 (() => {
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-  const tg='https://t.me/ferixdiii?text='+encodeURIComponent('Хочу безлимит');
+  const tg='https://t.me/religantno?text='+encodeURIComponent('Хочу безлимит');
 
   function run(){
     // Remove legacy or redundant blocks completely.
@@ -15,26 +15,26 @@
     $('#contact')?.remove();
 
     const status=$('.status-pill');
-    if(status) status.innerHTML='<i></i> 1 000 ₽ · ПОЛНЫЙ БЕЗЛИМИТ · 1 МЕСЯЦ';
+    if(status) status.innerHTML='<i></i> 1 990 ₽ · ПОЛНЫЙ БЕЗЛИМИТ · 1 МЕСЯЦ';
 
     const discovery=$('.discovery-badge');
     if(discovery) discovery.textContent='ПОЛНЫЙ БЕЗЛИМИТ НА ГЕНЕРАЦИЮ AI-ВИДЕО';
 
     const lead=$('.hero-lead');
-    if(lead) lead.innerHTML='<strong>1 000 ₽ — полный безлимит на генерацию AI-видео на месяц.</strong> Без кредитов и подсчёта каждой попытки. Генерируешь, переделываешь и тестируешь столько вариантов, сколько нужно в рамках доступа.';
+    if(lead) lead.innerHTML='<strong>1 990 ₽ — полный безлимит на генерацию AI-видео на месяц.</strong> Без кредитов и подсчёта каждой попытки. Генерируешь, переделываешь и тестируешь столько вариантов, сколько нужно в рамках доступа.';
 
     if(!$('.hero-price-chip')){
       const leadEl=$('.hero-lead');
-      if(leadEl) leadEl.insertAdjacentHTML('afterend','<div class="hero-price-chip"><i></i><strong>1 000 ₽ / месяц</strong><span>полный безлимит без кредитов</span></div>');
+      if(leadEl) leadEl.insertAdjacentHTML('afterend','<div class="hero-price-chip"><i></i><strong>1 990 ₽ / месяц</strong><span>полный безлимит без кредитов</span></div>');
     }
 
     const unlimitedH=$('#unlimited .section-head h2');
     const unlimitedP=$('#unlimited .section-head p');
-    if(unlimitedH) unlimitedH.innerHTML='1 000 ₽ в месяц.<br><em>И просто генерируешь.</em>';
+    if(unlimitedH) unlimitedH.innerHTML='1 990 ₽ в месяц.<br><em>И просто генерируешь.</em>';
     if(unlimitedP) unlimitedP.textContent='Это именно полный безлимит на генерацию AI-видео в рамках месячного доступа: не пакет кредитов и не запас попыток. Не понравился дубль — делаешь следующий и не считаешь, сколько осталось.';
 
     const primary=$('.hero-actions .button-primary');
-    if(primary){primary.href=tg;primary.target='_blank';primary.rel='noopener';primary.innerHTML='Забрать безлимит за 1 000 ₽ <span>↗</span>';}
+    if(primary){primary.href=tg;primary.target='_blank';primary.rel='noopener';primary.innerHTML='Забрать безлимит за 1 990 ₽ <span>↗</span>';}
     const secondary=$('.hero-actions .button-ghost');
     if(secondary){secondary.textContent='Смотреть реальные видео';secondary.href='#works';secondary.removeAttribute('target');}
 
@@ -42,7 +42,7 @@
     if(trigger) trigger.innerHTML='Хочешь забрать доступ или есть вопросы? <b>Просто напиши мне «Хочу безлимит»</b>. Я лично объясню подключение и покажу, как всё устроено.';
 
     const navCta=$('.nav-cta');
-    if(navCta){navCta.href=tg;navCta.target='_blank';navCta.rel='noopener';navCta.textContent=innerWidth<520?'Забрать ↗':'Забрать за 1 000 ₽';}
+    if(navCta){navCta.href=tg;navCta.target='_blank';navCta.rel='noopener';navCta.textContent=innerWidth<520?'Забрать ↗':'Забрать за 1 990 ₽';}
 
     // Authoritative copy: this is a tool used in real work, not a one-off test.
     const lipTitle=$('#lipsync .voice-copy h2');
@@ -83,5 +83,5 @@
   addEventListener('load',run,{once:true});
   setTimeout(run,80);
   setTimeout(run,500);
-  addEventListener('resize',()=>{const a=$('.nav-cta');if(a)a.textContent=innerWidth<520?'Забрать ↗':'Забрать за 1 000 ₽';},{passive:true});
+  addEventListener('resize',()=>{const a=$('.nav-cta');if(a)a.textContent=innerWidth<520?'Забрать ↗':'Забрать за 1 990 ₽';},{passive:true});
 })();
