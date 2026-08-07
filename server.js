@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
-const APP_VERSION = '20260807-1059-cinematic';
+const APP_VERSION = '20260807-1115-journey';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -67,11 +67,17 @@ function safeFile(urlPath) {
 
 function versionHtml(html) {
   let out = html;
-  if (!out.includes('/premium-motion.css')) {
-    out = out.replace('</head>', `<link rel="stylesheet" href="/premium-motion.css?v=${APP_VERSION}">\n</head>`);
+  // Remove legacy runtime-injected motion layers if they were ever committed manually.
+  out = out.replace(/<link[^>]+premium-motion\.css[^>]*>\s*/g,'')
+           .replace(/<script[^>]+premium-motion\.js[^>]*><\/script>\s*/g,'')
+           .replace(/<link[^>]+experience-v2\.css[^>]*>\s*/g,'')
+           .replace(/<script[^>]+experience-v2\.js[^>]*><\/script>\s*/g,'');
+
+  if (!out.includes('/journey.css')) {
+    out = out.replace('</head>', `<link rel="stylesheet" href="/journey.css?v=${APP_VERSION}">\n</head>`);
   }
-  if (!out.includes('/premium-motion.js')) {
-    out = out.replace('</body>', `<script src="/premium-motion.js?v=${APP_VERSION}" defer></script>\n</body>`);
+  if (!out.includes('/journey.js')) {
+    out = out.replace('</body>', `<script src="/journey.js?v=${APP_VERSION}" defer></script>\n</body>`);
   }
   return out.replace(/(href|src)="(\/[^"?#]+\.(?:css|js))"/g, (_m, attr, asset) => `${attr}="${asset}?v=${APP_VERSION}"`);
 }
