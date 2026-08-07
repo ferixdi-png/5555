@@ -30,6 +30,7 @@
 
   const wall=$('#videoWall'), countEl=$('#videoCount'), empty=$('#emptyState');
   const modal=$('#videoModal'), modalVideo=$('#modalVideo'), modalCaption=$('#modalCaption'), modalClose=$('#modalClose');
+  const bgAudio=$('#autoAudio');
   let expected=0;
 
   function updateVideoState(){
@@ -92,6 +93,10 @@
     else { modal.removeAttribute('open'); modal.removeAttribute('data-fallback-open'); document.documentElement.classList.remove('modal-open'); }
     if(modalVideo){ modalVideo.pause(); modalVideo.removeAttribute('src'); modalVideo.load(); }
     modal?.classList.remove('is-loading','is-error');
+    if(bgAudio?.dataset.resumeAfterModal==='1'){
+      delete bgAudio.dataset.resumeAfterModal;
+      bgAudio.play().catch(()=>{});
+    }
   }
   modalClose?.addEventListener('click',closeModal);
   modal?.addEventListener('click',e=>{if(e.target===modal) closeModal();});
@@ -104,14 +109,25 @@
     modalVideo.addEventListener('error',()=>{ modal?.classList.remove('is-loading'); modal?.classList.add('is-error'); });
   }
 
+  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   async function discoverVideos(){
-    try{
-      const res=await fetch('/api/videos',{cache:'no-store'});
-      if(!res.ok) throw new Error('discovery failed');
-      const data=await res.json();
-      if(Array.isArray(data.videos)) return data.videos.filter(x=>/^video-\d{2}\.mp4$/i.test(x));
-    }catch(err){ console.warn('Video discovery failed',err); }
-    return [];
+    for(let attempt=0;attempt<3;attempt++){
+      try{
+        const res=await fetch('/api/videos',{cache:'no-store'});
+        if(!res.ok) throw new Error('discovery failed');
+        const data=await res.json();
+        if(Array.isArray(data.videos)){
+          const list=data.videos.filter(x=>/^video-\d{2}\.mp4$/i.test(x));
+          if(list.length) return list;
+        }
+      }catch(err){
+        if(attempt===2) console.warn('Video discovery failed',err);
+      }
+      await wait(250*(attempt+1));
+    }
+    // The current project contains 12 numbered videos. This fallback keeps the
+    // gallery usable if the discovery request is briefly interrupted on mobile.
+    return Array.from({length:12},(_,i)=>`video-${String(i+1).padStart(2,'0')}.mp4`);
   }
 
   async function buildGallery(){
@@ -152,6 +168,10 @@
       const open=()=>{
         if(!modal || !modalVideo) return;
         v.pause();
+        if(bgAudio && !bgAudio.paused){
+          bgAudio.dataset.resumeAfterModal='1';
+          bgAudio.pause();
+        }
         modalCaption.textContent=`${num} / ${title} · 1080P · 8 SEC`;
         if(!showModalSafe()) return;
         modal.classList.add('is-loading');
