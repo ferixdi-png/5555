@@ -1,7 +1,16 @@
 services:
   - type: web
-    runtime: static
-    name: ai-video-lab
-    buildCommand: echo "No build required"
-    staticPublishPath: .
+    name: unlimited-video
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
     autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
