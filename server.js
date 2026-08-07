@@ -5,6 +5,7 @@ const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC = path.join(__dirname, 'public');
+const APP_VERSION = '20260807-1048-scrollstory';
 
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8',
@@ -15,7 +16,7 @@ const MIME = {
 const recent = new Map();
 function json(res, status, data) {
   const body = Buffer.from(JSON.stringify(data));
-  res.writeHead(status, {'Content-Type':'application/json; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store'});
+  res.writeHead(status, {'Content-Type':'application/json; charset=utf-8','Content-Length':body.length,'Cache-Control':'no-store','X-App-Version':APP_VERSION});
   res.end(body);
 }
 function clean(value, max = 100) { return String(value || '').replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, max); }
@@ -63,38 +64,69 @@ function safeFile(urlPath) {
   const file=path.join(PUBLIC, normalized);
   return file.startsWith(PUBLIC) ? file : null;
 }
-function serveIndex(res) {
-  const file=path.join(PUBLIC,'index.html');
-  fs.stat(file,(err,stat)=>{
-    if(err){res.writeHead(500,{'Content-Type':'text/plain; charset=utf-8'});return res.end('index.html not found');}
-    res.writeHead(200,{'Content-Type':MIME['.html'],'Content-Length':stat.size,'Cache-Control':'no-cache'});
-    fs.createReadStream(file).pipe(res);
+
+function versionHtml(html) {
+  return html.replace(/(href|src)="(\/[^"?#]+\.(?:css|js))"/g, (_m, attr, asset) => `${attr}="${asset}?v=${APP_VERSION}"`);
+}
+
+function serveHtml(res, file) {
+  fs.readFile(file, 'utf8', (err, html) => {
+    if (err) {
+      res.writeHead(500, {'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});
+      return res.end('index.html not found');
+    }
+    const body = Buffer.from(versionHtml(html));
+    res.writeHead(200, {
+      'Content-Type':MIME['.html'],
+      'Content-Length':body.length,
+      'Cache-Control':'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma':'no-cache',
+      'Expires':'0',
+      'X-App-Version':APP_VERSION
+    });
+    res.end(body);
   });
 }
+
 function serveFile(req,res,file){
   fs.stat(file,(err,stat)=>{
-    if(err || !stat.isFile()) return serveIndex(res);
-    const ext=path.extname(file).toLowerCase(), type=MIME[ext] || 'application/octet-stream', range=req.headers.range;
-    if(range && /\.(mp4|webm|mp3|wav)$/.test(ext)){
+    if(err || !stat.isFile()) return serveHtml(res, path.join(PUBLIC,'index.html'));
+    const ext=path.extname(file).toLowerCase();
+    if (ext === '.html') return serveHtml(res, file);
+
+    const type=MIME[ext] || 'application/octet-stream', range=req.headers.range;
+    const isMedia=/\.(mp4|webm|mp3|wav)$/.test(ext);
+    const isCode=/\.(css|js)$/.test(ext);
+
+    if(range && isMedia){
       const m=/^bytes=(\d*)-(\d*)$/.exec(range);
       if(!m){res.writeHead(416,{'Content-Range':`bytes */${stat.size}`});return res.end();}
       const start=m[1]?Number(m[1]):0, end=m[2]?Math.min(Number(m[2]),stat.size-1):stat.size-1;
       if(start>end || start>=stat.size){res.writeHead(416,{'Content-Range':`bytes */${stat.size}`});return res.end();}
-      res.writeHead(206,{'Content-Type':type,'Accept-Ranges':'bytes','Content-Range':`bytes ${start}-${end}/${stat.size}`,'Content-Length':end-start+1,'Cache-Control':'public, max-age=86400'});
+      res.writeHead(206,{
+        'Content-Type':type,'Accept-Ranges':'bytes','Content-Range':`bytes ${start}-${end}/${stat.size}`,
+        'Content-Length':end-start+1,'Cache-Control':'public, max-age=86400','X-App-Version':APP_VERSION
+      });
       return fs.createReadStream(file,{start,end}).pipe(res);
     }
-    res.writeHead(200,{'Content-Type':type,'Content-Length':stat.size,'Cache-Control':ext==='.html'?'no-cache':(/\.(mp4|webm|mp3|wav)$/.test(ext)?'public, max-age=86400':'public, max-age=3600')});
+
+    const cache = isCode ? 'no-store, no-cache, must-revalidate' : (isMedia ? 'public, max-age=86400' : 'public, max-age=3600');
+    res.writeHead(200,{'Content-Type':type,'Content-Length':stat.size,'Cache-Control':cache,'X-App-Version':APP_VERSION});
     fs.createReadStream(file).pipe(res);
   });
 }
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host || 'localhost'}`);
-  if(req.method==='GET' && url.pathname==='/healthz'){res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});return res.end('ok');}
+  if(req.method==='GET' && url.pathname==='/healthz'){
+    res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store','X-App-Version':APP_VERSION});
+    return res.end(`ok ${APP_VERSION}`);
+  }
+  if(req.method==='GET' && url.pathname==='/version') return json(res,200,{version:APP_VERSION});
   if(req.method==='POST' && url.pathname==='/api/lead') return lead(req,res);
   if(req.method!=='GET' && req.method!=='HEAD'){res.writeHead(405,{'Allow':'GET, HEAD, POST'});return res.end();}
   const pathname=url.pathname==='/'?'/index.html':url.pathname, file=safeFile(pathname);
   if(!file){res.writeHead(400,{'Content-Type':'text/plain; charset=utf-8'});return res.end('Bad request');}
   serveFile(req,res,file);
 });
-server.listen(PORT,'0.0.0.0',()=>console.log(`Unlimited Video site listening on :${PORT}`));
+server.listen(PORT,'0.0.0.0',()=>console.log(`Unlimited Video ${APP_VERSION} listening on :${PORT}`));
