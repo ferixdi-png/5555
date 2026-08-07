@@ -132,7 +132,13 @@
   $$('[data-close-player]',player).forEach(el=>el.addEventListener('click',()=>closePlayer()));
   addEventListener('keydown',e=>{if(e.key==='Escape'&&player.classList.contains('is-open')) closePlayer();});
   addEventListener('popstate',()=>{if(player.classList.contains('is-open')) closePlayer(true);});
-  addEventListener('pagehide',()=>{ if(player.classList.contains('is-open')) resetPlayerMedia(); });
+  addEventListener('pagehide',()=>{
+    if(player.classList.contains('is-open')){
+      clearPlayerTimer();
+      playerVideo.pause();
+      player.classList.remove('is-playing','is-loading');
+    }
+  });
 
   playerPlay.addEventListener('click',()=>{
     if(!currentSrc) return;
@@ -149,8 +155,8 @@
   playerVideo.addEventListener('playing',()=>{ clearPlayerTimer(); player.classList.remove('is-loading','is-error'); player.classList.add('is-playing'); });
   playerVideo.addEventListener('waiting',()=>{ if(!playerVideo.paused) player.classList.add('is-loading'); });
   playerVideo.addEventListener('stalled',()=>{ if(!playerVideo.paused) player.classList.add('is-loading'); });
-  playerVideo.addEventListener('pause',()=>player.classList.remove('is-playing','is-loading'));
-  playerVideo.addEventListener('ended',()=>player.classList.remove('is-playing','is-loading'));
+  playerVideo.addEventListener('pause',()=>{ clearPlayerTimer(); player.classList.remove('is-playing','is-loading'); });
+  playerVideo.addEventListener('ended',()=>{ clearPlayerTimer(); player.classList.remove('is-playing','is-loading'); });
   playerVideo.addEventListener('error',()=>{ clearPlayerTimer(); player.classList.remove('is-loading'); player.classList.add('is-error'); });
 
   function updateVideoState(){
